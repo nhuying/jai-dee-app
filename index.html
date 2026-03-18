@@ -1680,7 +1680,7 @@
     <input type="text" id="mistakeText" placeholder="ผิดพลาด / สิ่งที่เกิดขึ้น">
     <textarea id="lessonText" rows="3" placeholder="บทเรียนที่ได้..." style="margin-top: 10px;"></textarea>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="doKintsugi()">✨ สร้างทอง</button>
+      <button class="btn btn-primary" onclick="doKintsugi()">✨ เปลี่ยนแผลเป็นพลัง</button>
     </div>
     <div id="kintsugi-wrap">
       <canvas id="kintsugi-canvas" width="600" height="200"></canvas>
@@ -1691,6 +1691,7 @@
     <div class="section-head">
       <div class="section-concept">DAILY TASKS</div>
       <div class="section-title">สิ่งเล็กๆ ที่ทำวันนี้</div>
+      <div class="section-desc">พัฒนาวันละนิด — ไม่ต้องยิ่งใหญ่ แค่เริ่มทำสักอย่าง ก็สร้างแรงเหวี่ยงได้แล้ว</div>
     </div>
     <div style="display: flex; gap: 8px; margin-bottom: 14px;">
       <input type="text" id="newTask" placeholder="เพิ่มสิ่งที่จะทำ...">
@@ -1931,6 +1932,36 @@
 
   <div class="card">
     <div class="section-head">
+      <div class="section-title">💝 ช่วยเหลือผู้พัฒนา</div>
+      <div class="section-desc">แอปนี้พัฒนาด้วยใจ ฟรีตลอดกาล</div>
+    </div>
+    
+    <div id="premiumStatus" style="padding: 15px; background: var(--accent-pale); border-radius: 10px; margin-bottom: 15px; text-align: center;">
+      <div style="font-size: 14px; color: var(--accent); font-weight: 600; margin-bottom: 8px;">
+        🎉 คุณใช้งานแบบ: <span id="userTier">ฟรี (ทดลองใช้)</span>
+      </div>
+      <div style="font-size: 12px; color: var(--muted);" id="premiumDesc">
+        ซื้อกาแฟให้ผู้พัฒนาเพื่อปลดล็อกฟีเจอร์เต็มรูปแบบ
+      </div>
+    </div>
+    
+    <div class="btn-row" style="margin-bottom: 10px;">
+      <button class="btn btn-primary" onclick="showDonateModal()" style="flex: 1;">
+        ☕ ซื้อกาแฟให้ผู้พัฒนา (65฿)
+      </button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-soft" onclick="openEmail()" style="flex: 1;">
+        📧 ติดต่อผู้พัฒนา
+      </button>
+      <button class="btn btn-soft" onclick="openFeedbackForm()" style="flex: 1;">
+        💬 ให้ Feedback
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
       <div class="section-title">เป้าหมายส่วนตัว</div>
     </div>
     <div class="setting-item">
@@ -2000,6 +2031,105 @@
       <button class="share-btn instagram" onclick="shareModalToInstagram()">📷 Instagram</button>
       <button class="share-btn line" onclick="shareModalToLine()">💬 LINE</button>
       <button class="share-btn copy" onclick="copyModalText()">📋 คัดลอก</button>
+    </div>
+  </div>
+</div>
+
+<!-- DONATE MODAL -->
+<div class="modal-overlay" id="donateModal">
+  <div class="modal-content" style="max-width: 500px;">
+    <button class="modal-close" onclick="closeDonateModal()">×</button>
+    <div style="text-align: center;">
+      <div style="font-size: 64px; margin-bottom: 20px;">☕</div>
+      <h2 style="font-size: 28px; margin-bottom: 15px; color: var(--accent);">
+        ซื้อกาแฟให้ผู้พัฒนา
+      </h2>
+      <p style="color: var(--muted); margin-bottom: 25px; line-height: 1.7;">
+        แอป "ใจดี...กับตัวเอง" ฟรีตลอดกาล<br>
+        แต่ถ้าคุณรู้สึกว่ามีประโยชน์ ช่วยเหลือผู้พัฒนาได้ที่
+      </p>
+      
+      <div style="background: var(--bg); padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+        <img src="./QRCodePromptPay.jpg" alt="QR Code พร้อมเพย์" style="width: 100%; max-width: 300px; border-radius: 10px; margin-bottom: 15px;">
+        <p style="font-size: 24px; font-weight: 600; color: var(--accent); margin-bottom: 10px;">
+          65 บาท
+        </p>
+        <p style="font-size: 13px; color: var(--muted);">
+          สแกน QR Code ด้วยแอปธนาคาร
+        </p>
+      </div>
+      
+      <div style="background: var(--accent-pale); padding: 20px; border-radius: 15px; margin-bottom: 20px; text-align: left;">
+        <p style="font-weight: 600; margin-bottom: 15px; color: var(--accent);">
+          ✨ ปลดล็อกฟีเจอร์พิเศษ:
+        </p>
+        <div style="line-height: 2; font-size: 14px;">
+          <p>✅ ดูสถิติย้อนหลังทั้งหมด</p>
+          <p>✅ แชร์การ์ดสวยๆ ไปโซเชียล</p>
+          <p>✅ Export ข้อมูล CSV/PDF</p>
+          <p>✅ Soundscape ครบ 6 เสียง</p>
+          <p>✅ ธีมสีพิเศษ 5+ แบบ</p>
+          <p>✅ ไม่มีโฆษณา</p>
+        </div>
+      </div>
+      
+      <div style="background: var(--border); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+        <p style="font-size: 12px; color: var(--muted); line-height: 1.7;">
+          💡 <strong>วิธีใช้:</strong> หลังโอนเงินแล้ว กลับมาที่หน้านี้<br>
+          แล้วกด "ฉันโอนเงินแล้ว" เพื่อปลดล็อกฟีเจอร์<br>
+          <em>(ระบบจะบันทึกไว้ในเครื่องคุณ)</em>
+        </p>
+      </div>
+      
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="unlockPremium()" style="flex: 1;">
+          ✅ ฉันโอนเงินแล้ว
+        </button>
+        <button class="btn btn-soft" onclick="closeDonateModal()" style="flex: 1;">
+          ไว้ทีหลัง
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAYWALL MODAL -->
+<div class="modal-overlay" id="paywallModal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closePaywall()">×</button>
+    <div style="text-align: center;">
+      <div style="font-size: 64px; margin-bottom: 20px;">🔒</div>
+      <h2 style="font-size: 24px; margin-bottom: 15px; color: var(--accent);" id="paywallTitle">
+        ฟีเจอร์พรีเมียม
+      </h2>
+      <p style="color: var(--muted); margin-bottom: 25px; line-height: 1.7;" id="paywallDesc">
+        ฟีเจอร์นี้เป็นส่วนหนึ่งของ Premium Features
+      </p>
+      
+      <div style="background: var(--accent-pale); padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+        <p style="font-size: 13px; color: var(--accent); margin-bottom: 10px;">
+          💝 ปลดล็อกได้ที่:
+        </p>
+        <p style="font-size: 20px; font-weight: 600; color: var(--accent);">
+          ☕ ซื้อกาแฟ 1 แก้ว = 65 บาท
+        </p>
+      </div>
+      
+      <div style="background: var(--bg); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+        <p style="font-size: 13px; color: var(--muted);">
+          💡 <strong>ทางเลือก:</strong><br>
+          คุณสามารถ Screenshot หน้าจอแล้วแชร์เองได้นะ!
+        </p>
+      </div>
+      
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="showDonateModal(); closePaywall();" style="flex: 1;">
+          ☕ ปลดล็อก 65฿
+        </button>
+        <button class="btn btn-soft" onclick="closePaywall()" style="flex: 1;">
+          ไว้ทีหลัง
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -2680,39 +2810,94 @@ function doKintsugi() {
   wrap.style.display = 'block';
   const canvas = document.getElementById('kintsugi-canvas');
   const ctx = canvas.getContext('2d');
-  const W=canvas.width, H=canvas.height;
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#181410'; ctx.fillRect(0,0,W,H);
-  const cracks=[[60,30,200,110],[180,10,310,150],[280,50,420,170],[80,90,260,160],[350,20,540,130],[460,70,600,190],[100,140,350,180]];
-  ctx.strokeStyle='#2e2418'; ctx.lineWidth=1;
-  cracks.forEach(([x1,y1,x2,y2])=>{
-    ctx.beginPath();ctx.moveTo(x1,y1);
-    ctx.lineTo((x1+x2)/2+(Math.random()-.5)*20,(y1+y2)/2+(Math.random()-.5)*20);
-    ctx.lineTo(x2,y2);ctx.stroke();
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  
+  // Background
+  ctx.fillStyle = '#181410';
+  ctx.fillRect(0, 0, W, H);
+  
+  // Draw vessel shape (bowl/pot)
+  const centerX = W / 2;
+  const centerY = H / 2;
+  const vesselWidth = 280;
+  const vesselHeight = 140;
+  
+  // Vessel body (dark ceramic)
+  ctx.fillStyle = '#2a1f1a';
+  ctx.strokeStyle = '#1a1410';
+  ctx.lineWidth = 2;
+  
+  ctx.beginPath();
+  // Bowl shape
+  ctx.ellipse(centerX, centerY - 20, vesselWidth / 2, vesselHeight / 2, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  
+  // Define cracks on the vessel
+  const cracks = [
+    // Crack 1: top left to bottom
+    { start: [centerX - 80, centerY - 60], mid: [centerX - 60, centerY], end: [centerX - 40, centerY + 50] },
+    // Crack 2: top right to bottom
+    { start: [centerX + 70, centerY - 55], mid: [centerX + 50, centerY - 10], end: [centerX + 30, centerY + 45] },
+    // Crack 3: horizontal middle
+    { start: [centerX - 100, centerY + 10], mid: [centerX - 20, centerY + 15], end: [centerX + 80, centerY + 5] }
+  ];
+  
+  // Draw dark cracks first
+  ctx.strokeStyle = '#1a1410';
+  ctx.lineWidth = 1.5;
+  cracks.forEach(crack => {
+    ctx.beginPath();
+    ctx.moveTo(crack.start[0], crack.start[1]);
+    ctx.quadraticCurveTo(crack.mid[0], crack.mid[1], crack.end[0], crack.end[1]);
+    ctx.stroke();
   });
-  let prog=0;
-  function drawGold(){
-    prog=Math.min(prog+0.025,1);
-    cracks.forEach(([x1,y1,x2,y2])=>{
-      const gx=x1+(x2-x1)*prog, gy=y1+(y2-y1)*prog;
-      const mx=(x1+x2)/2, my=(y1+y2)/2;
-      const gr=ctx.createLinearGradient(x1,y1,x2,y2);
-      gr.addColorStop(0,'#b5703a');gr.addColorStop(.5,'#f0d080');gr.addColorStop(1,'#b5703a');
-      ctx.strokeStyle=gr;ctx.lineWidth=2.5;
-      ctx.shadowColor='#f0d080';ctx.shadowBlur=10;
-      ctx.beginPath();ctx.moveTo(x1,y1);
-      ctx.lineTo(mx+(Math.random()-.5)*8,my+(Math.random()-.5)*8);
-      ctx.lineTo(gx,gy);ctx.stroke();ctx.shadowBlur=0;
+  
+  // Animate gold filling
+  let prog = 0;
+  function drawGold() {
+    prog = Math.min(prog + 0.02, 1);
+    
+    cracks.forEach(crack => {
+      // Calculate current position along the curve
+      const t = prog;
+      const x = (1 - t) * (1 - t) * crack.start[0] + 2 * (1 - t) * t * crack.mid[0] + t * t * crack.end[0];
+      const y = (1 - t) * (1 - t) * crack.start[1] + 2 * (1 - t) * t * crack.mid[1] + t * t * crack.end[1];
+      
+      // Gold gradient
+      const gradient = ctx.createLinearGradient(crack.start[0], crack.start[1], crack.end[0], crack.end[1]);
+      gradient.addColorStop(0, '#b5703a');
+      gradient.addColorStop(0.5, '#f0d080');
+      gradient.addColorStop(1, '#b5703a');
+      
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 3;
+      ctx.shadowColor = '#f0d080';
+      ctx.shadowBlur = 8;
+      
+      ctx.beginPath();
+      ctx.moveTo(crack.start[0], crack.start[1]);
+      ctx.quadraticCurveTo(crack.mid[0], crack.mid[1], x, y);
+      ctx.stroke();
+      
+      ctx.shadowBlur = 0;
     });
-    if(prog>=1){
-      ctx.fillStyle='rgba(240,208,128,0.9)';
-      ctx.font='14px Sarabun,sans-serif';ctx.textAlign='center';
-      ctx.fillText('"'+lesson.slice(0,60)+'"',W/2,H-18);
+    
+    if (prog < 1) requestAnimationFrame(drawGold);
+    else {
+      // Add text after animation
+      ctx.fillStyle = '#f0d080';
+      ctx.font = '14px "Sarabun", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(mistake, centerX, H - 30);
+      ctx.fillStyle = '#d4af37';
+      ctx.font = '12px "Sarabun", sans-serif';
+      ctx.fillText(`→ ${lesson}`, centerX, H - 10);
     }
-    if(prog<1)requestAnimationFrame(drawGold);
   }
+  
   drawGold();
-  addPoints(25);
 }
 
 // ─── TASKS ─────────────────────────────────────────────────
