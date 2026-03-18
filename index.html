@@ -2153,7 +2153,8 @@ const S = {
   goals: JSON.parse(localStorage.getItem('wl_goals') || '{"weeklyMeditation": 5, "reminderTime": "20:00"}'),
   challenges: JSON.parse(localStorage.getItem('wl_challenges') || '[]'),
   breathMode: 'normal',
-  currentShareTheme: 'achievement'
+  currentShareTheme: 'achievement',
+  isPremium: localStorage.getItem('wl_premium') === 'true'
 };
 
 // ─── ACHIEVEMENTS ──────────────────────────────────────────
@@ -3759,6 +3760,9 @@ function init() {
   drawShareCard();
   initSounds();
   
+  // Update premium status
+  updatePremiumStatus();
+  
   // Check if user has seen onboarding
   checkOnboarding();
 }
@@ -4253,6 +4257,128 @@ window.selectMood = function(val, btn) {
       askNotificationPermission();
     }, 2000);
   }
+};
+
+// ═══════════════════════════════════════════════════════════
+// PREMIUM FEATURES & MONETIZATION SYSTEM
+// ═══════════════════════════════════════════════════════════
+
+// ─── PREMIUM CHECK ─────────────────────────────────────────
+function isPremium() {
+  return localStorage.getItem('wl_premium') === 'true';
+}
+
+function checkPremiumFeature(featureName) {
+  if (isPremium()) {
+    return true;
+  }
+  showPaywall(featureName);
+  return false;
+}
+
+// ─── UNLOCK PREMIUM ────────────────────────────────────────
+function unlockPremium() {
+  localStorage.setItem('wl_premium', 'true');
+  S.isPremium = true;
+  updatePremiumStatus();
+  closeDonateModal();
+  
+  showNotification('🎉 ปลดล็อกสำเร็จ!', 'ขอบคุณที่ช่วยเหลือผู้พัฒนา ฟีเจอร์ทั้งหมดพร้อมใช้งานแล้ว!');
+  
+  // Refresh UI
+  setTimeout(() => {
+    location.reload();
+  }, 2000);
+}
+
+function updatePremiumStatus() {
+  const premium = isPremium();
+  const tierElement = document.getElementById('userTier');
+  const descElement = document.getElementById('premiumDesc');
+  
+  if (tierElement && descElement) {
+    if (premium) {
+      tierElement.textContent = '💎 Premium (เต็มรูปแบบ)';
+      tierElement.style.color = 'var(--green)';
+      descElement.textContent = 'ขอบคุณที่ช่วยเหลือผู้พัฒนา!';
+    } else {
+      tierElement.textContent = 'ฟรี (ทดลองใช้)';
+      tierElement.style.color = 'var(--accent)';
+      descElement.textContent = 'ซื้อกาแฟให้ผู้พัฒนาเพื่อปลดล็อกฟีเจอร์เต็มรูปแบบ';
+    }
+  }
+}
+
+// ─── MODALS ────────────────────────────────────────────────
+function showDonateModal() {
+  document.getElementById('donateModal').classList.add('show');
+}
+
+function closeDonateModal() {
+  document.getElementById('donateModal').classList.remove('show');
+}
+
+function showPaywall(featureName) {
+  const modal = document.getElementById('paywallModal');
+  const titleEl = document.getElementById('paywallTitle');
+  const descEl = document.getElementById('paywallDesc');
+  
+  const features = {
+    'share': {
+      title: '🎨 แชร์การ์ดสวยๆ',
+      desc: 'สร้างและแชร์การ์ดสวยๆ ไปยัง Facebook, Instagram, LINE และโซเชียลอื่นๆ'
+    },
+    'export': {
+      title: '📊 Export ข้อมูล',
+      desc: 'ดาวน์โหลดข้อมูลทั้งหมดเป็นไฟล์ CSV หรือ PDF เพื่อเก็บไว้หรือวิเคราะห์'
+    },
+    'stats_full': {
+      title: '📈 สถิติย้อนหลังทั้งหมด',
+      desc: 'ดูสถิติและกราฟย้อนหลังทั้งหมด ไม่จำกัดเฉพาะ 7 วัน'
+    },
+    'sounds': {
+      title: '🎵 Soundscape ครบทุกเสียง',
+      desc: 'ใช้เสียงธรรมชาติครบทั้ง 6 แบบ: ฝน, ลำธาร, คลื่น, ป่า, ลม, ไฟ'
+    },
+    'themes': {
+      title: '🎨 ธีมสีพิเศษ',
+      desc: 'เลือกใช้ธีมสีพิเศษมากกว่า 5 แบบ ตกแต่งแอปตามใจคุณ'
+    }
+  };
+  
+  const feature = features[featureName] || {
+    title: 'ฟีเจอร์พรีเมียม',
+    desc: 'ฟีเจอร์นี้เป็นส่วนหนึ่งของ Premium Features'
+  };
+  
+  titleEl.textContent = feature.title;
+  descEl.textContent = feature.desc;
+  
+  modal.classList.add('show');
+}
+
+function closePaywall() {
+  document.getElementById('paywallModal').classList.remove('show');
+}
+
+// ─── CONTACT & FEEDBACK ────────────────────────────────────
+function openEmail() {
+  window.location.href = 'mailto:S.kawraksawed@gmail.com?subject=ติดต่อผู้พัฒนา "ใจดี...กับตัวเอง"&body=สวัสดีครับ,%0D%0A%0D%0A';
+}
+
+function openFeedbackForm() {
+  // TODO: แทนที่ด้วย Google Form URL ที่สร้างจริง
+  const formURL = 'https://forms.gle/6bmSX1e9rAHHeuea7';
+  window.open(formURL, '_blank');
+}
+
+// ─── OVERRIDE SHARE MODAL ──────────────────────────────────
+const originalShowShareModal = showShareModal;
+window.showShareModal = function() {
+  if (!checkPremiumFeature('share')) {
+    return;
+  }
+  originalShowShareModal();
 };
 </script>
 </body>
