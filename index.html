@@ -1973,7 +1973,7 @@
 <!-- BREATHING SCREEN -->
 <div id="ma-screen">
   <button id="ma-close" onclick="closeMa()">✕</button>
-  <div id="breath-ring"></div>
+  <div id="breath-ring" class="breath-circle"></div>
   <div id="breath-text">หายใจเข้า...</div>
   <div id="ma-timer">5:00</div>
   <div id="ma-hint">กดปิดได้ตลอดเวลา</div>
@@ -2288,23 +2288,41 @@ function startBreathCycle() {
   const breathCircle = document.querySelector('.breath-circle');
   const breathText = document.getElementById('breath-text');
   
+  console.log('🧘 Breath cycle started', {
+    mode: S.breathMode,
+    breathCircle: !!breathCircle,
+    breathText: !!breathText,
+    durations
+  });
+  
+  if (!breathCircle) {
+    console.error('❌ breath-circle element not found!');
+    return;
+  }
+  
   function updateCircleAnimation() {
+    if (!breathCircle) return;
+    
     if (phase === 0) {
       // Inhale - วงกลมขยาย
       breathCircle.style.animation = `breathe-in ${mode.inhale}ms ease-in-out forwards`;
+      console.log('→ Inhale: expanding circle');
     } else if (phase === 1 && mode.hold > 0) {
       // Hold - วงกลมหยุด (ขนาดใหญ่)
       breathCircle.style.animation = 'none';
       breathCircle.style.transform = 'scale(1.8)';
       breathCircle.style.opacity = '1';
+      console.log('→ Hold: circle paused (large)');
     } else if (phase === 2) {
       // Exhale - วงกลมหด
       breathCircle.style.animation = `breathe-out ${mode.exhale}ms ease-in-out forwards`;
+      console.log('→ Exhale: shrinking circle');
     } else if (phase === 3 && mode.pause > 0) {
       // Pause - วงกลมหยุด (ขนาดเล็ก)
       breathCircle.style.animation = 'none';
       breathCircle.style.transform = 'scale(0.8)';
       breathCircle.style.opacity = '0.5';
+      console.log('→ Pause: circle paused (small)');
     }
   }
   
@@ -2315,7 +2333,12 @@ function startBreathCycle() {
       return;
     }
     
-    breathText.textContent = phases[phase];
+    const phaseText = phases[phase];
+    console.log(`Phase ${phase}: ${phaseText} (${durations[phase]}ms)`);
+    
+    if (breathText) {
+      breathText.textContent = phaseText;
+    }
     updateCircleAnimation();
     
     setTimeout(() => {
