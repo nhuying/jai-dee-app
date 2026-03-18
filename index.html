@@ -976,10 +976,12 @@
     justify-content: center;
     z-index: 9998;
     padding: 20px;
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
   }
   
   .onboarding-overlay.show {
-    display: flex;
+    display: flex !important;
   }
   
   .onboarding-container {
@@ -1681,13 +1683,13 @@
     <div class="section-head">
       <div class="section-concept">IKIGAI</div>
       <div class="section-title">เหตุผลที่ตื่นขึ้นมาทุกวัน</div>
-      <div class="section-desc">สร้างสรรค์สิ่งที่ทำค่างไว้</div>
+      <div class="section-desc">ค้นหาจุดมุ่งหมายของชีวิต</div>
     </div>
     <div class="ikigai-grid">
-      <textarea class="ikigai-input" id="iki1" rows="2" placeholder="1. สิ่งที่เรารัก และมีความสุขกับมันที่ได้ทำ คืออะไร?"></textarea>
-      <textarea class="ikigai-input" id="iki2" rows="2" placeholder="2. สิ่งที่โลกนี้/ประโยชน์ต่อโลก คืออะไร?"></textarea>
-      <textarea class="ikigai-input" id="iki3" rows="2" placeholder="3. สิ่งที่เราทำได้ดี คืออะไร?"></textarea>
-      <textarea class="ikigai-input" id="iki4" rows="2" placeholder="4. สิ่งที่สร้างรายได้ให้เรา คืออะไร?"></textarea>
+      <textarea class="ikigai-input" id="iki1" rows="2" placeholder="1. สิ่งที่คุณรัก และมีความสุขเมื่อได้ทำ คืออะไร?"></textarea>
+      <textarea class="ikigai-input" id="iki2" rows="2" placeholder="2. สิ่งที่โลกต้องการ/ประโยชน์ต่อโลก คืออะไร?"></textarea>
+      <textarea class="ikigai-input" id="iki3" rows="2" placeholder="3. สิ่งที่คุณทำได้ดี คืออะไร?"></textarea>
+      <textarea class="ikigai-input" id="iki4" rows="2" placeholder="4. สิ่งที่สร้างรายได้ให้คุณ คืออะไร?"></textarea>
       <div id="ikigaiCenter">กรอกทั้ง 4 ช่อง เพื่อค้นหาเข็มทิศของคุณ</div>
     </div>
     <div class="btn-row">
@@ -3388,12 +3390,17 @@ function checkOnboarding() {
   // Hide splash screen after 2.5 seconds
   setTimeout(() => {
     console.log('⏰ Hiding splash screen...');
-    document.getElementById('splashScreen').style.display = 'none';
+    const splash = document.getElementById('splashScreen');
+    if (splash) {
+      splash.style.display = 'none';
+    }
     
     // Show onboarding if first time
     if (!hasSeenOnboarding) {
       console.log('✨ First time! Showing onboarding...');
-      showOnboarding();
+      setTimeout(() => {
+        showOnboarding();
+      }, 100); // Small delay for iOS
     } else {
       console.log('✅ Already seen onboarding, skipping...');
     }
