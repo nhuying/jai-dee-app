@@ -478,8 +478,16 @@
   }
   .btn-primary { background: var(--accent); color: white; }
   .btn-primary:hover { background: #9a5e2e; transform: translateY(-1px); }
-  .btn-soft { background: var(--border); color: var(--ink); }
-  .btn-soft:hover { background: var(--accent-light); }
+  .btn-soft { 
+    background: var(--accent-pale); 
+    color: var(--accent); 
+    border: 1.5px solid var(--accent-light);
+  }
+  .btn-soft:hover { 
+    background: var(--accent-light); 
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
   .btn-green { background: var(--green); color: white; }
   .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 
@@ -1896,7 +1904,12 @@
 <div class="mode" id="mode7">
   <div class="card">
     <div class="section-head">
-      <div class="section-title">ติดตั้งและการแจ้งเตือน</div>
+      <div class="section-title">แอปพลิเคชัน</div>
+    </div>
+    <div class="btn-row" style="margin-bottom: 15px;">
+      <button class="btn btn-soft" onclick="resetOnboarding()" style="flex: 1;">
+        📚 ดู Tutorial อีกครั้ง
+      </button>
     </div>
     <div class="btn-row">
       <button class="btn btn-primary" onclick="showInstallInstructions()" style="flex: 1;">
