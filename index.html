@@ -2458,12 +2458,7 @@ function startBreathCycle() {
   }
   
   function nextPhase() {
-    if (durations[phase] === 0) {
-      phase = (phase + 1) % 4;
-      if (phase === 0 || durations[phase] === 0) nextPhase();
-      return;
-    }
-    
+    // Update text and animation
     const phaseText = phases[phase];
     console.log(`Phase ${phase}: ${phaseText} (${durations[phase]}ms)`);
     
@@ -2472,10 +2467,17 @@ function startBreathCycle() {
     }
     updateCircleAnimation();
     
+    // Schedule next phase
     setTimeout(() => {
       phase = (phase + 1) % 4;
+      
+      // Skip phases with 0 duration
+      while (durations[phase] === 0 && phase !== 0) {
+        phase = (phase + 1) % 4;
+      }
+      
       nextPhase();
-    }, durations[phase]);
+    }, durations[phase] || 100); // Minimum 100ms to prevent infinite loop
   }
   
   nextPhase();
@@ -4363,12 +4365,14 @@ function closePaywall() {
 
 // ─── CONTACT & FEEDBACK ────────────────────────────────────
 function openEmail() {
-  window.location.href = 'mailto:S.kawraksawed@gmail.com?subject=ติดต่อผู้พัฒนา "ใจดี...กับตัวเอง"&body=สวัสดีครับ,%0D%0A%0D%0A';
+  const subject = encodeURIComponent('ติดต่อผู้พัฒนา "ใจดี...กับตัวเอง"');
+  const body = encodeURIComponent('สวัสดีครับ,\n\n');
+  window.location.href = `mailto:S.kawraksawed@gmail.com?subject=${subject}&body=${body}`;
 }
 
 function openFeedbackForm() {
   // TODO: แทนที่ด้วย Google Form URL ที่สร้างจริง
-  const formURL = 'https://forms.gle/6bmSX1e9rAHHeuea7';
+  const formURL = 'https://forms.gle/YOUR_FORM_ID';
   window.open(formURL, '_blank');
 }
 
