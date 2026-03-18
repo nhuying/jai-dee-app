@@ -577,6 +577,14 @@
     0%,100% { transform: scale(0.8); opacity: 0.5; }
     50% { transform: scale(1.8); opacity: 1; }
   }
+  @keyframes breathe-in {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    100% { transform: scale(1.8); opacity: 1; }
+  }
+  @keyframes breathe-out {
+    0% { transform: scale(1.8); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0.5; }
+  }
   #breath-text { color: #c8a06e; font-size: 15px; letter-spacing: 0.15em; font-family: 'Sarabun', sans-serif; }
   #ma-timer { color: #e8d0a8; font-size: 52px; font-family: 'Noto Serif Thai', serif; font-weight: 300; }
   #ma-close { position: absolute; top: 20px; right: 20px; color: #6a5a40; background: none; border: none; font-size: 26px; cursor: pointer; }
@@ -2277,13 +2285,39 @@ function startBreathCycle() {
   const phases = ['หายใจเข้า...', 'กลั้นลม...', 'หายใจออก...', 'พัก...'];
   const durations = [mode.inhale, mode.hold, mode.exhale, mode.pause];
   
+  const breathCircle = document.querySelector('.breath-circle');
+  const breathText = document.getElementById('breath-text');
+  
+  function updateCircleAnimation() {
+    if (phase === 0) {
+      // Inhale - วงกลมขยาย
+      breathCircle.style.animation = `breathe-in ${mode.inhale}ms ease-in-out forwards`;
+    } else if (phase === 1 && mode.hold > 0) {
+      // Hold - วงกลมหยุด (ขนาดใหญ่)
+      breathCircle.style.animation = 'none';
+      breathCircle.style.transform = 'scale(1.8)';
+      breathCircle.style.opacity = '1';
+    } else if (phase === 2) {
+      // Exhale - วงกลมหด
+      breathCircle.style.animation = `breathe-out ${mode.exhale}ms ease-in-out forwards`;
+    } else if (phase === 3 && mode.pause > 0) {
+      // Pause - วงกลมหยุด (ขนาดเล็ก)
+      breathCircle.style.animation = 'none';
+      breathCircle.style.transform = 'scale(0.8)';
+      breathCircle.style.opacity = '0.5';
+    }
+  }
+  
   function nextPhase() {
     if (durations[phase] === 0) {
       phase = (phase + 1) % 4;
       if (phase === 0 || durations[phase] === 0) nextPhase();
       return;
     }
-    document.getElementById('breath-text').textContent = phases[phase];
+    
+    breathText.textContent = phases[phase];
+    updateCircleAnimation();
+    
     setTimeout(() => {
       phase = (phase + 1) % 4;
       nextPhase();
