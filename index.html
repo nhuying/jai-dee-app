@@ -918,14 +918,15 @@
     justify-content: center;
     flex-direction: column;
     z-index: 9999;
-    animation: splashFadeOut 0.5s ease 2s forwards;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
   }
   
-  @keyframes splashFadeOut {
-    to {
-      opacity: 0;
-      visibility: hidden;
-    }
+  .splash-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
   
   .splash-logo {
@@ -989,10 +990,13 @@
     border-radius: 20px;
     max-width: 500px;
     width: 100%;
+    max-height: 90vh;
     padding: 40px 30px 30px;
     position: relative;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     animation: slideUp 0.4s ease;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
   @keyframes slideUp {
@@ -3392,15 +3396,15 @@ function checkOnboarding() {
     console.log('⏰ Hiding splash screen...');
     const splash = document.getElementById('splashScreen');
     if (splash) {
-      splash.style.display = 'none';
+      splash.classList.add('hidden');
     }
     
-    // Show onboarding if first time
+    // Show onboarding if first time (with extra delay for iOS)
     if (!hasSeenOnboarding) {
       console.log('✨ First time! Showing onboarding...');
       setTimeout(() => {
         showOnboarding();
-      }, 100); // Small delay for iOS
+      }, 300); // Longer delay for iOS
     } else {
       console.log('✅ Already seen onboarding, skipping...');
     }
@@ -3545,9 +3549,12 @@ window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
   
+  console.log('✅ Install prompt saved, deferredPrompt:', !!deferredPrompt);
+  
   // Show install prompt after onboarding
   setTimeout(() => {
     if (!localStorage.getItem('wl_install_prompted')) {
+      console.log('🎯 Auto-showing install prompt...');
       showInstallPrompt();
     }
   }, 5000); // Show 5 seconds after page load
@@ -3844,17 +3851,140 @@ function closeInstallModalIOS() {
 
 // Add global function to manually trigger install prompt
 window.showInstallInstructions = function() {
-  if (isIOSDevice) {
+  console.log('📱 showInstallInstructions called', { 
+    isIOSDevice, 
+    hasDeferredPrompt: !!deferredPrompt,
+    userAgent: navigator.userAgent 
+  });
+  
+  // Always show iOS instructions on iOS devices
+  if (isIOSDevice || /iPad|iPhone|iPod/.test(navigator.userAgent)) {
     showInstallPromptIOS();
-  } else {
+  } else if (deferredPrompt) {
+    // Android/Desktop with install prompt available
     showInstallPrompt();
+  } else {
+    // Android/Desktop but no prompt yet - show manual instructions
+    showAndroidInstallInstructions();
   }
+};
+
+// Android manual install instructions
+function showAndroidInstallInstructions() {
+  const modal = `
+    <div class="modal-overlay show" id="androidInstallModal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeAndroidInstallModal()">×</button>
+        <div style="text-align: center;">
+          <div style="font-size: 64px; margin-bottom: 20px;">📱</div>
+          <h2 style="font-size: 24px; margin-bottom: 15px; color: var(--accent);">
+            ติดตั้งแอป "ใจดี...กับตัวเอง"
+          </h2>
+          <div style="text-align: left; line-height: 2; margin: 25px 0;">
+            <p style="margin-bottom: 15px; font-weight: 600;">ทำตามขั้นตอนนี้:</p>
+            <p>1️⃣ กดปุ่ม <strong>เมนู</strong> (⋮) มุมขวาบน</p>
+            <p>2️⃣ เลือก <strong>"Add to Home screen"</strong></p>
+            <p style="margin-left: 20px; color: var(--muted); font-size: 13px;">หรือ "Install app"</p>
+            <p>3️⃣ กด <strong>"Install"</strong> หรือ <strong>"Add"</strong></p>
+          </div>
+          <div style="background: var(--accent-pale); padding: 15px; border-radius: 10px; margin-top: 20px;">
+            <p style="font-size: 13px; color: var(--accent);">
+              💡 หลังจากติดตั้ง คุณจะเปิดแอปได้จากหน้าจอหลักเหมือนแอปทั่วไป!
+            </p>
+          </div>
+          <button class="btn btn-primary" onclick="closeAndroidInstallModal()" style="margin-top: 20px; width: 100%;">
+            เข้าใจแล้ว
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modal);
+}
+
+function closeAndroidInstallModal() {
+  const modal = document.getElementById('androidInstallModal');
+  if (modal) modal.remove();
+}
+
+// Debug function - check PWA installation status
+window.checkPWAStatus = function() {
+  console.log('=== PWA Status ===');
+  console.log('User Agent:', navigator.userAgent);
+  console.log('Is iOS:', isIOSDevice);
+  console.log('Has deferredPrompt:', !!deferredPrompt);
+  console.log('Service Worker supported:', 'serviceWorker' in navigator);
+  console.log('Manifest:', document.querySelector('link[rel="manifest"]')?.href);
+  console.log('Standalone mode:', window.matchMedia('(display-mode: standalone)').matches);
+  console.log('Install prompted before:', localStorage.getItem('wl_install_prompted'));
+  console.log('PWA installed before:', localStorage.getItem('wl_pwa_installed'));
+  
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      console.log('Service Worker registrations:', registrations.length);
+      registrations.forEach((reg, i) => {
+        console.log(`  [${i}]`, reg.scope);
+      });
+    });
+  }
+  
+  return {
+    isIOSDevice,
+    hasDeferredPrompt: !!deferredPrompt,
+    canInstall: !!deferredPrompt || isIOSDevice,
+    isStandalone: window.matchMedia('(display-mode: standalone)').matches
+  };
 };
 
 // Add global function to manually ask for notifications
 window.enableAppNotifications = function() {
+  // Check if iOS
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  
+  if (isIOS) {
+    // Show message that iOS doesn't support web notifications
+    const modal = `
+      <div class="modal-overlay show" id="iosNotificationInfo">
+        <div class="modal-content">
+          <button class="modal-close" onclick="closeIOSNotificationInfo()">×</button>
+          <div style="text-align: center;">
+            <div style="font-size: 64px; margin-bottom: 20px;">📱</div>
+            <h2 style="font-size: 24px; margin-bottom: 15px; color: var(--accent);">
+              การแจ้งเตือนบน iOS
+            </h2>
+            <p style="color: var(--ink); line-height: 1.7; margin-bottom: 25px;">
+              <strong>Safari บน iOS/iPadOS ยังไม่รองรับ Web Push Notifications</strong>
+            </p>
+            <div style="text-align: left; line-height: 2; margin: 25px 0;">
+              <p style="margin-bottom: 15px; font-weight: 600;">แต่คุณยังสามารถ:</p>
+              <p>1️⃣ <strong>ติดตั้งแอปไปยังหน้าจอหลัก</strong></p>
+              <p style="margin-left: 20px; color: var(--muted); font-size: 13px;">เพื่อเข้าถึงได้ง่ายขึ้น</p>
+              <p>2️⃣ <strong>ตั้งเวลาเตือนในปฏิทิน</strong></p>
+              <p style="margin-left: 20px; color: var(--muted); font-size: 13px;">สร้าง reminder ใน iOS Calendar</p>
+              <p>3️⃣ <strong>ตั้ง Alarm เตือนตัวเอง</strong></p>
+              <p style="margin-left: 20px; color: var(--muted); font-size: 13px;">เช่น ทุกวัน 20:00 น.</p>
+            </div>
+            <button class="btn btn-primary" onclick="closeIOSNotificationInfo()" style="width: 100%; margin-top: 20px;">
+              เข้าใจแล้ว
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modal);
+    return;
+  }
+  
+  // For non-iOS devices
   askNotificationPermission();
 };
+
+function closeIOSNotificationInfo() {
+  const modal = document.getElementById('iosNotificationInfo');
+  if (modal) modal.remove();
+}
 
 // Ask for notification permission after first mood log
 const originalSelectMood = selectMood;
