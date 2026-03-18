@@ -1,0 +1,3867 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ใจดี...กับตัวเอง · Wellness & Mindfulness</title>
+
+<!-- PWA Meta Tags -->
+<meta name="description" content="แอปดูแลจิตใจ ติดตามอารมณ์ ฝึกสมาธิ และสร้างนิสัยที่ดี">
+<meta name="theme-color" content="#b5703a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ใจดี">
+<meta name="mobile-web-app-capable" content="yes">
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="/manifest.json">
+
+<!-- Apple Touch Icons -->
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-72x72.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-72x72.png">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Noto+Serif+Thai:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #f2ede6;
+    --paper: #faf8f4;
+    --ink: #2a2118;
+    --muted: #7a6e60;
+    --accent: #b5703a;
+    --accent-light: #e8c99a;
+    --accent-pale: #f5ead8;
+    --green: #4a7a5e;
+    --green-pale: #ddeee5;
+    --blue: #3d6478;
+    --blue-pale: #d8eaf2;
+    --border: #e2d9cc;
+    --shadow: rgba(42,33,24,0.08);
+    --gold: #d4af37;
+    --purple: #8b6f9e;
+  }
+
+  [data-theme="dark"] {
+    --bg: #1a1410;
+    --paper: #2a2118;
+    --ink: #e8ded0;
+    --muted: #9a8976;
+    --border: #3a3128;
+    --shadow: rgba(0,0,0,0.3);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--paper);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    transition: background 0.3s;
+  }
+  .header-left {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .app-name {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+  .app-tagline { font-size: 13px; color: var(--muted); }
+  
+  .header-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .header-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--accent-pale);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .theme-toggle {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  .theme-toggle:hover { opacity: 1; }
+
+  /* NAV */
+  nav {
+    display: flex;
+    background: var(--paper);
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 48px;
+    z-index: 100;
+    transition: background 0.3s;
+    overflow-x: auto;
+  }
+  nav button {
+    flex: 1;
+    min-width: 80px;
+    padding: 11px 6px 9px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.25s;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  nav button .icon { font-size: 18px; display: block; margin-bottom: 2px; }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+  /* MAIN */
+  main { flex: 1; max-width: 1200px; margin: 0 auto; width: 100%; padding: 20px 16px 80px; }
+
+  .mode { display: none; animation: fadeIn 0.4s ease; }
+  .mode.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  /* DASHBOARD */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .dash-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .dash-card h3 {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+  .dash-big {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .dash-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .dash-progress {
+    background: var(--border);
+    height: 8px;
+    border-radius: 4px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .dash-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    transition: width 0.6s ease;
+  }
+
+  /* SECTION HEADER */
+  .section-head {
+    margin-bottom: 6px;
+  }
+  .section-concept {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .section-title {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .section-desc { font-size: 13px; color: var(--muted); line-height: 1.7; margin-top: 4px; }
+
+  /* CARD */
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  /* BADGES */
+  .badges-row {
+    display: flex;
+    gap: 10px;
+    margin: 14px 0;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .badge {
+    min-width: 80px;
+    padding: 12px 10px;
+    background: var(--border);
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .badge.unlocked {
+    background: linear-gradient(135deg, var(--gold), #f0d080);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+  }
+  .badge-icon {
+    font-size: 32px;
+    filter: grayscale(100%);
+    transition: filter 0.3s;
+  }
+  .badge.unlocked .badge-icon {
+    filter: grayscale(0%);
+  }
+  .badge-name {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 6px;
+    color: var(--ink);
+  }
+
+  /* SHARE BUTTONS */
+  .share-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .share-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .share-btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+  }
+  .share-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .share-btn.facebook { background: #1877f2; }
+  .share-btn.twitter { background: #1da1f2; }
+  .share-btn.line { background: #06c755; }
+  .share-btn.instagram { background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); }
+  .share-btn.copy { background: var(--muted); }
+  .share-btn.download { background: var(--accent); }
+
+  /* SHARE CARD PREVIEW */
+  .share-card-preview {
+    margin: 20px 0;
+    text-align: center;
+  }
+  #shareCanvas {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px var(--shadow);
+  }
+
+  /* CHALLENGE */
+  .challenge-card {
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    color: white;
+    border: none;
+  }
+  .challenge-card h3 {
+    color: white;
+  }
+  .challenge-input {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .challenge-input input {
+    flex: 1;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+  }
+  .challenge-input input::placeholder {
+    color: rgba(255,255,255,0.7);
+  }
+  .challenge-list {
+    margin-top: 14px;
+  }
+  .challenge-item {
+    background: rgba(255,255,255,0.15);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* MOOD */
+  .mood-grid { display: flex; gap: 8px; margin: 14px 0 8px; }
+  .mood-btn {
+    flex: 1;
+    padding: 10px 4px 8px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    font-size: 22px;
+    text-align: center;
+    transition: all 0.2s;
+    line-height: 1;
+  }
+  .mood-btn .mlabel { font-size: 10px; color: var(--muted); display: block; margin-top: 4px; }
+  .mood-btn:hover { transform: translateY(-2px); border-color: var(--accent-light); }
+  .mood-btn.selected { background: var(--accent-pale); border-color: var(--accent); }
+  .mood-btn.selected .mlabel { color: var(--accent); font-weight: 600; }
+
+  .mood-response {
+    background: var(--accent-pale);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--accent);
+    min-height: 36px;
+    line-height: 1.6;
+  }
+
+  /* CHART */
+  .chart-wrap { margin: 14px 0 4px; }
+  .mini-chart { display: flex; align-items: flex-end; gap: 8px; height: 72px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .bar {
+    width: 100%;
+    background: linear-gradient(to top, var(--accent), var(--accent-light));
+    border-radius: 5px 5px 0 0;
+    min-height: 4px;
+    transition: height 0.6s cubic-bezier(.34,1.56,.64,1);
+    cursor: pointer;
+  }
+  .bar:hover {
+    opacity: 0.8;
+  }
+  .bar.empty { background: var(--border); }
+  .bar-label { font-size: 11px; color: var(--muted); }
+
+  .streak-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .streak-label { font-size: 12px; color: var(--muted); }
+  .streak-dots { display: flex; gap: 5px; }
+  .streak-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); transition: background 0.3s; }
+  .streak-dot.on { background: var(--accent); }
+
+  /* CALENDAR VIEW */
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .cal-day:hover {
+    transform: scale(1.05);
+    border-color: var(--accent);
+  }
+  .cal-day.has-mood {
+    border: 2px solid var(--accent);
+  }
+  .cal-day .day-num {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .cal-day .day-mood {
+    font-size: 16px;
+    margin-top: 2px;
+  }
+  .cal-day.today {
+    background: var(--accent-pale);
+  }
+
+  /* TEXTAREA / INPUT */
+  textarea, input[type=text], input[type=time] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s, background 0.3s;
+    line-height: 1.7;
+  }
+  textarea:focus, input:focus { border-color: var(--accent); background: var(--paper); }
+
+  /* BUTTONS */
+  .btn {
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #9a5e2e; transform: translateY(-1px); }
+  .btn-soft { background: var(--border); color: var(--ink); }
+  .btn-soft:hover { background: var(--accent-light); }
+  .btn-green { background: var(--green); color: white; }
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+
+  /* NOTIFICATION */
+  .notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    max-width: 350px;
+    background: var(--paper);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 8px 24px var(--shadow);
+    z-index: 999;
+    display: none;
+    animation: slideIn 0.4s ease;
+  }
+  .notification.show { display: block; }
+  @keyframes slideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .notif-title {
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .notif-message {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .notif-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  /* QUOTE */
+  .quote-card {
+    background: linear-gradient(135deg, var(--accent-pale), var(--blue-pale));
+    border: none;
+    padding: 24px;
+    text-align: center;
+    font-style: italic;
+  }
+  .quote-text {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 16px;
+    color: var(--ink);
+    line-height: 1.8;
+    margin-bottom: 10px;
+  }
+  .quote-author {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* MA BREATHING */
+  #ma-screen {
+    position: fixed; inset: 0;
+    background: #1c1710;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 999;
+    gap: 28px;
+  }
+  #ma-screen.show { display: flex; }
+  #breath-ring {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(181,112,58,0.8), rgba(181,112,58,0.1));
+    animation: breathe 4s ease-in-out infinite;
+    box-shadow: 0 0 40px rgba(181,112,58,0.3);
+  }
+  @keyframes breathe {
+    0%,100% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.8); opacity: 1; }
+  }
+  #breath-text { color: #c8a06e; font-size: 15px; letter-spacing: 0.15em; font-family: 'Sarabun', sans-serif; }
+  #ma-timer { color: #e8d0a8; font-size: 52px; font-family: 'Noto Serif Thai', serif; font-weight: 300; }
+  #ma-close { position: absolute; top: 20px; right: 20px; color: #6a5a40; background: none; border: none; font-size: 26px; cursor: pointer; }
+  #ma-hint { color: #5a4a30; font-size: 12px; letter-spacing: 0.08em; }
+  .breath-mode-select {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .breath-mode-btn {
+    flex: 1;
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .breath-mode-btn.selected {
+    background: var(--accent-pale);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* SOUNDBOARD */
+  .sound-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 15px; margin-top: 14px; }
+  .sound-card {
+    padding: 16px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    transition: all 0.3s;
+  }
+  .sound-card.playing {
+    background: var(--green-pale);
+    border-color: var(--green);
+  }
+  .sound-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .sound-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sound-icon {
+    font-size: 28px;
+  }
+  .sound-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .sound-toggle {
+    width: 40px;
+    height: 24px;
+    background: var(--border);
+    border-radius: 12px;
+    position: relative;
+    transition: background 0.3s;
+    cursor: pointer;
+  }
+  .sound-toggle::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.3s;
+  }
+  .sound-toggle.active {
+    background: var(--green);
+  }
+  .sound-toggle.active::after {
+    transform: translateX(16px);
+  }
+  .sound-volume {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .sound-card.playing .sound-volume {
+    opacity: 1;
+    max-height: 40px;
+  }
+  .volume-icon {
+    font-size: 16px;
+  }
+  .volume-slider {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--green);
+    cursor: pointer;
+  }
+  .volume-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--green);
+    cursor: pointer;
+    border: none;
+  }
+  .volume-value {
+    font-size: 12px;
+    color: var(--muted);
+    min-width: 35px;
+    text-align: right;
+  }
+
+  /* MEMORIES & NOTES */
+  .memory-note, .sad-note {
+    background: var(--bg);
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border-left: 3px solid var(--accent);
+    transition: opacity 0.3s;
+  }
+  .note-text {
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.6;
+    margin-bottom: 6px;
+  }
+  .note-age {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* WORRY RELEASE */
+  #worry-output {
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 16px;
+    color: var(--ink);
+    margin-top: 14px;
+    transition: all 0.3s;
+  }
+
+  /* KINTSUGI */
+  #kintsugi-wrap {
+    margin-top: 20px;
+    display: none;
+  }
+  #kintsugi-canvas {
+    width: 100%;
+    max-width: 600px;
+    height: 200px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+
+  /* TASKS */
+  #taskList { list-style: none; margin-top: 14px; }
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px;
+    background: var(--bg);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: opacity 0.3s;
+  }
+  .task-check {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .task-check:hover {
+    background: var(--accent-pale);
+  }
+  .task-check.done {
+    background: var(--accent);
+    color: white;
+  }
+  .task-text {
+    flex: 1;
+    font-size: 14px;
+    color: var(--ink);
+    transition: all 0.3s;
+  }
+  .task-text.done {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+
+  /* IKIGAI */
+  .ikigai-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 14px 0;
+  }
+  .ikigai-input {
+    padding: 14px;
+  }
+  #ikigaiCenter {
+    grid-column: 1 / -1;
+    background: var(--border);
+    color: var(--muted);
+    text-align: center;
+    padding: 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+    transition: all 0.5s;
+  }
+  #ikigaiDiagram {
+    margin-top: 20px;
+    text-align: center;
+  }
+  #ikigai-canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* SETTINGS/GOALS */
+  .setting-item {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .setting-item:last-child {
+    border-bottom: none;
+  }
+  .setting-label {
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .setting-desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  .modal-overlay.show {
+    display: flex;
+  }
+  .modal-content {
+    background: var(--paper);
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: modalIn 0.3s ease;
+  }
+  @keyframes modalIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--muted);
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  @media (max-width: 768px) {
+    .header-stat {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+    .dash-grid {
+      grid-template-columns: 1fr;
+    }
+    nav button {
+      font-size: 11px;
+      padding: 9px 4px 7px;
+    }
+    nav button .icon {
+      font-size: 16px;
+    }
+    .share-buttons {
+      justify-content: center;
+    }
+    .share-btn {
+      font-size: 12px;
+      padding: 8px 14px;
+    }
+  }
+
+  /* SPLASH SCREEN */
+  .splash-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 9999;
+    animation: splashFadeOut 0.5s ease 2s forwards;
+  }
+  
+  @keyframes splashFadeOut {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+  
+  .splash-logo {
+    font-size: 72px;
+    animation: bounce 1s ease infinite;
+  }
+  
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  
+  .splash-title {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 48px;
+    font-weight: 600;
+    color: white;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .splash-tagline {
+    font-size: 18px;
+    color: rgba(255,255,255,0.9);
+  }
+  
+  .splash-loader {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-top: 30px;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ONBOARDING */
+  .onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9998;
+    padding: 20px;
+  }
+  
+  .onboarding-overlay.show {
+    display: flex;
+  }
+  
+  .onboarding-container {
+    background: var(--paper);
+    border-radius: 20px;
+    max-width: 500px;
+    width: 100%;
+    padding: 40px 30px 30px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideUp 0.4s ease;
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .onboarding-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: var(--muted);
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  
+  .onboarding-close:hover {
+    color: var(--ink);
+  }
+  
+  .onboarding-slide {
+    display: none;
+    text-align: center;
+  }
+  
+  .onboarding-slide.active {
+    display: block;
+    animation: fadeIn 0.4s ease;
+  }
+  
+  .onboarding-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .onboarding-title {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 15px;
+  }
+  
+  .onboarding-description {
+    font-size: 16px;
+    color: var(--ink);
+    line-height: 1.7;
+    margin-bottom: 25px;
+  }
+  
+  .onboarding-features {
+    text-align: left;
+    margin-bottom: 25px;
+  }
+  
+  .onboarding-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+  
+  .feature-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  
+  .feature-text {
+    flex: 1;
+  }
+  
+  .feature-title {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  
+  .feature-desc {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  
+  .onboarding-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 25px;
+  }
+  
+  .onboarding-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  
+  .onboarding-dot.active {
+    background: var(--accent);
+    width: 30px;
+    border-radius: 5px;
+  }
+  
+  .onboarding-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .onboarding-buttons button {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .btn-skip {
+    background: var(--border);
+    color: var(--ink);
+  }
+  
+  .btn-skip:hover {
+    background: var(--accent-light);
+  }
+  
+  .btn-next {
+    background: var(--accent);
+    color: white;
+  }
+  
+  .btn-next:hover {
+    background: #9a5e2e;
+    transform: translateY(-2px);
+  }
+  
+  .btn-start {
+    background: linear-gradient(135deg, var(--accent), var(--gold));
+    color: white;
+  }
+  
+  .btn-start:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(181, 112, 58, 0.4);
+  }
+</style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div class="splash-screen" id="splashScreen">
+  <div class="splash-logo">🌸</div>
+  <div class="splash-title">ใจดี...กับตัวเอง</div>
+  <div class="splash-tagline">เส้นทางสู่ความสงบภายใน</div>
+  <div class="splash-loader"></div>
+</div>
+
+<!-- ONBOARDING -->
+<div class="onboarding-overlay" id="onboardingOverlay">
+  <div class="onboarding-container">
+    <button class="onboarding-close" onclick="skipOnboarding()">×</button>
+    
+    <!-- Slide 1: Welcome -->
+    <div class="onboarding-slide active" data-slide="0">
+      <div class="onboarding-icon">🌸</div>
+      <div class="onboarding-title">ยินดีต้อนรับ</div>
+      <div class="onboarding-description">
+        ใจดี...กับตัวเอง คือแอปพลิเคชันที่จะช่วยให้คุณดูแลจิตใจ<br>
+        ติดตามอารมณ์ และสร้างนิสัยที่ดีเพื่อสุขภาพจิตที่แข็งแรง
+      </div>
+    </div>
+
+    <!-- Slide 2: Track Mood -->
+    <div class="onboarding-slide" data-slide="1">
+      <div class="onboarding-icon">💭</div>
+      <div class="onboarding-title">ติดตามอารมณ์</div>
+      <div class="onboarding-description">
+        บันทึกความรู้สึกของคุณทุกวัน
+      </div>
+      <div class="onboarding-features">
+        <div class="onboarding-feature">
+          <div class="feature-icon">📊</div>
+          <div class="feature-text">
+            <div class="feature-title">กราฟอารมณ์</div>
+            <div class="feature-desc">ดูแนวโน้มอารมณ์ย้อนหลัง 7-30 วัน</div>
+          </div>
+        </div>
+        <div class="onboarding-feature">
+          <div class="feature-icon">🔥</div>
+          <div class="feature-text">
+            <div class="feature-title">Streak Counter</div>
+            <div class="feature-desc">สร้างนิสัยบันทึกต่อเนื่อง</div>
+          </div>
+        </div>
+        <div class="onboarding-feature">
+          <div class="feature-icon">🙏</div>
+          <div class="feature-text">
+            <div class="feature-title">Gratitude Journal</div>
+            <div class="feature-desc">บันทึกสิ่งดีๆ ที่เกิดขึ้นแต่ละวัน</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Meditation -->
+    <div class="onboarding-slide" data-slide="2">
+      <div class="onboarding-icon">🧘</div>
+      <div class="onboarding-title">ฝึกสมาธิ</div>
+      <div class="onboarding-description">
+        ผ่อนคลายจิตใจด้วยการฝึกสมาธิและเสียงธรรมชาติ
+      </div>
+      <div class="onboarding-features">
+        <div class="onboarding-feature">
+          <div class="feature-icon">⏱️</div>
+          <div class="feature-text">
+            <div class="feature-title">Timer สมาธิ</div>
+            <div class="feature-desc">เลือกเวลา 1-10 นาที พร้อมการหายใจแบบต่างๆ</div>
+          </div>
+        </div>
+        <div class="onboarding-feature">
+          <div class="feature-icon">🎵</div>
+          <div class="feature-text">
+            <div class="feature-title">Soundscape</div>
+            <div class="feature-desc">เสียงธรรมชาติ 6 แบบ ปรับความดังได้</div>
+          </div>
+        </div>
+        <div class="onboarding-feature">
+          <div class="feature-icon">📈</div>
+          <div class="feature-text">
+            <div class="feature-title">ติดตามความก้าวหน้า</div>
+            <div class="feature-desc">ดูสถิติการฝึกสมาธิของคุณ</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4: Gamification -->
+    <div class="onboarding-slide" data-slide="3">
+      <div class="onboarding-icon">🏆</div>
+      <div class="onboarding-title">สนุกกับการเติบโต</div>
+      <div class="onboarding-description">
+        ระบบแต้ม เลเวล และความสำเร็จ
+      </div>
+      <div class="onboarding-features">
+        <div class="onboarding-feature">
+          <div class="feature-icon">⭐</div>
+          <div class="feature-text">
+            <div class="feature-title">ระบบแต้ม & Level</div>
+            <div class="feature-desc">ทำกิจกรรมได้แต้ม ขึ้นเลเวลเมื่อครบ 500 แต้ม</div>
+          </div>
+        </div>
+        <div class="onboarding-feature">
+          <div class="feature-icon">🎖️</div>
+          <div class="feature-text">
+            <div class="feature-title">12 Achievements</div>
+            <div class="feature-desc">ปลดล็อกความสำเร็จพิเศษ</div>
+          </div>
+        </div>
+        <div class="onboarding-feature">
+          <div class="feature-icon">🎯</div>
+          <div class="feature-text">
+            <div class="feature-title">เป้าหมายรายสัปดาห์</div>
+            <div class="feature-desc">ติดตามความคืบหน้าของคุณ</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 5: Tools -->
+    <div class="onboarding-slide" data-slide="4">
+      <div class="onboarding-icon">✨</div>
+      <div class="onboarding-title">เครื่องมือพิเศษ</div>
+      <div class="onboarding-description">
+        ฟีเจอร์ที่ช่วยให้คุณเติบโตและค้นพบตัวเอง
+      </div>
+      <div class="onboarding-features">
+        <div class="onboarding-feature">
+          <div class="feature-icon">🌬️</div>
+          <div class="feature-text">
+            <div class="feature-title">ปล่อยวางความกังวล</div>
+            <div class="feature-desc">เขียนและปล่อยวางสิ่งที่กังวล</div>
+          </div>
+        </div>
+        <div class="onboarding-feature">
+          <div class="feature-icon">🎨</div>
+          <div class="feature-text">
+            <div class="feature-title">Kintsugi</div>
+            <div class="feature-desc">เปลี่ยนความผิดพลาดเป็นบทเรียน</div>
+          </div>
+        </div>
+        <div class="onboarding-feature">
+          <div class="feature-icon">🎯</div>
+          <div class="feature-text">
+            <div class="feature-title">Ikigai</div>
+            <div class="feature-desc">ค้นหาเหตุผลที่ตื่นขึ้นมาทุกวัน</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 6: Privacy -->
+    <div class="onboarding-slide" data-slide="5">
+      <div class="onboarding-icon">🔒</div>
+      <div class="onboarding-title">ความเป็นส่วนตัว</div>
+      <div class="onboarding-description">
+        ข้อมูลของคุณปลอดภัย
+      </div>
+      <div class="onboarding-features">
+        <div class="onboarding-feature">
+          <div class="feature-icon">💾</div>
+          <div class="feature-text">
+            <div class="feature-title">บันทึกในเครื่อง</div>
+            <div class="feature-desc">ข้อมูลเก็บใน Local Storage ไม่ส่งออกไปไหน</div>
+          </div>
+        </div>
+        <div class="onboarding-feature">
+          <div class="feature-icon">🤝</div>
+          <div class="feature-text">
+            <div class="feature-title">แชร์แค่ที่ภูมิใจ</div>
+            <div class="feature-desc">เลือกได้ว่าจะแชร์อะไร ไม่บังคับ</div>
+          </div>
+        </div>
+        <div class="onboarding-feature">
+          <div class="feature-icon">📥</div>
+          <div class="feature-text">
+            <div class="feature-title">Export ได้</div>
+            <div class="feature-desc">ดาวน์โหลดข้อมูลของคุณเองได้ทุกเมื่อ</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dots Navigation -->
+    <div class="onboarding-dots">
+      <div class="onboarding-dot active" onclick="goToSlide(0)"></div>
+      <div class="onboarding-dot" onclick="goToSlide(1)"></div>
+      <div class="onboarding-dot" onclick="goToSlide(2)"></div>
+      <div class="onboarding-dot" onclick="goToSlide(3)"></div>
+      <div class="onboarding-dot" onclick="goToSlide(4)"></div>
+      <div class="onboarding-dot" onclick="goToSlide(5)"></div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="onboarding-buttons">
+      <button class="btn-skip" onclick="skipOnboarding()" id="skipBtn">ข้าม</button>
+      <button class="btn-next" onclick="nextSlide()" id="nextBtn">ถัดไป</button>
+      <button class="btn-start" onclick="finishOnboarding()" id="startBtn" style="display: none;">เริ่มใช้งาน</button>
+    </div>
+  </div>
+</div>
+
+
+<header>
+  <div class="header-left">
+    <div class="app-name">ใจดี...กับตัวเอง</div>
+    <div class="app-tagline">เส้นทางสู่ความสงบภายใน</div>
+  </div>
+  <div class="header-right">
+    <div class="header-stat">
+      🔥 <span id="headerStreak">0</span>
+    </div>
+    <div class="header-stat">
+      ⭐ <span id="headerPoints">0</span>
+    </div>
+    <div class="header-stat">
+      Lv. <span id="headerLevel">1</span>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+  </div>
+</header>
+
+<nav>
+  <button onclick="showMode(0)"><span class="icon">💭</span>จิตใจ</button>
+  <button onclick="showMode(1)"><span class="icon">🧘</span>สมาธิ</button>
+  <button onclick="showMode(2)"><span class="icon">🌊</span>ปล่อยวาง</button>
+  <button onclick="showMode(3)"><span class="icon">✨</span>เติบโต</button>
+  <button class="active" onclick="showMode(4)"><span class="icon">🏠</span>ภาพรวม</button>
+  <button onclick="showMode(5)"><span class="icon">📊</span>สถิติ</button>
+  <button onclick="showMode(6)"><span class="icon">🤝</span>แชร์</button>
+  <button onclick="showMode(7)"><span class="icon">⚙️</span>ตั้งค่า</button>
+</nav>
+
+<main>
+
+<!-- MODE 0: MOOD & JOURNAL -->
+<div class="mode active" id="mode0">
+  <div class="card">
+    <div class="section-head">
+      <div class="section-concept">MINDFULNESS</div>
+      <div class="section-title">วันนี้คุณรู้สึกยังไง?</div>
+      <div class="section-desc">บันทึกอารมณ์เพื่อติดตามความรู้สึกของคุณ</div>
+    </div>
+    <div class="mood-grid">
+      <div class="mood-btn" onclick="selectMood(1, this)">😔<span class="mlabel">แย่มาก</span></div>
+      <div class="mood-btn" onclick="selectMood(2, this)">😕<span class="mlabel">ไม่ค่อยดี</span></div>
+      <div class="mood-btn" onclick="selectMood(3, this)">😐<span class="mlabel">ปกติ</span></div>
+      <div class="mood-btn" onclick="selectMood(4, this)">🙂<span class="mlabel">ดี</span></div>
+      <div class="mood-btn" onclick="selectMood(5, this)">😊<span class="mlabel">ดีมาก</span></div>
+    </div>
+    <div class="mood-response" id="moodResponse"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-title">ปฏิทินอารมณ์</div>
+      <div class="section-desc">ภาพรวมอารมณ์ 30 วันที่ผ่านมา</div>
+    </div>
+    <div class="calendar-grid" id="moodCalendar"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-concept">TRACKING</div>
+      <div class="section-title">กราฟอารมณ์ 7 วัน</div>
+    </div>
+    <div class="chart-wrap">
+      <div class="mini-chart" id="moodChart"></div>
+    </div>
+    <div class="streak-row">
+      <span class="streak-label">Streak</span>
+      <div class="streak-dots" id="streakDots"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-concept">GRATITUDE</div>
+      <div class="section-title">ช่วงเวลาดีๆ ที่จดจำ</div>
+      <div class="section-desc">บันทึกสิ่งที่ทำให้คุณมีความสุข</div>
+    </div>
+    <textarea id="momentNote" rows="3" placeholder="วันนี้มีอะไรดีๆ เกิดขึ้นบ้าง..."></textarea>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveMemory()">💾 บันทึก</button>
+    </div>
+    <div id="memoryList" style="margin-top: 14px;"></div>
+  </div>
+</div>
+
+<!-- MODE 1: MEDITATION -->
+<div class="mode" id="mode1">
+  <div class="card">
+    <div class="section-head">
+      <div class="section-concept">BREATHWORK</div>
+      <div class="section-title">รูปแบบการหายใจ</div>
+      <div class="section-desc">เลือกรูปแบบที่เหมาะกับคุณ</div>
+    </div>
+    <div class="breath-mode-select">
+      <button class="breath-mode-btn selected" onclick="setBreathMode('normal', this)">
+        ปกติ<br><small>4 วินาที</small>
+      </button>
+      <button class="breath-mode-btn" onclick="setBreathMode('478', this)">
+        4-7-8<br><small>ผ่อนคลาย</small>
+      </button>
+      <button class="breath-mode-btn" onclick="setBreathMode('box', this)">
+        Box<br><small>สมดุล</small>
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-concept">MEDITATION</div>
+      <div class="section-title">ฝึกสมาธิ</div>
+      <div class="section-desc">เริ่มต้นด้วยระยะเวลาที่สบาย</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-green" onclick="startMa(1)">1 นาที</button>
+      <button class="btn btn-green" onclick="startMa(3)">3 นาที</button>
+      <button class="btn btn-green" onclick="startMa(5)">5 นาที</button>
+      <button class="btn btn-green" onclick="startMa(10)">10 นาที</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-concept">SOUNDSCAPE</div>
+      <div class="section-title">เสียงธรรมชาติ</div>
+      <div class="section-desc">เสียงสังเคราะห์คุณภาพสูง - เปิดได้หลายเสียงพร้อมกัน ปรับความดังอิสระ</div>
+    </div>
+    <div class="sound-grid">
+      <div class="sound-card" id="sound-rain">
+        <div class="sound-header" onclick="toggleSound('rain')">
+          <div class="sound-info">
+            <span class="sound-icon">🌧️</span>
+            <span class="sound-name">ฝนตก</span>
+          </div>
+          <div class="sound-toggle" id="toggle-rain"></div>
+        </div>
+        <div class="sound-volume">
+          <span class="volume-icon">🔊</span>
+          <input type="range" class="volume-slider" id="volume-rain" min="0" max="100" value="50" oninput="setVolume('rain', this.value)">
+          <span class="volume-value" id="value-rain">50%</span>
+        </div>
+      </div>
+
+      <div class="sound-card" id="sound-river">
+        <div class="sound-header" onclick="toggleSound('river')">
+          <div class="sound-info">
+            <span class="sound-icon">🏞️</span>
+            <span class="sound-name">ลำธาร</span>
+          </div>
+          <div class="sound-toggle" id="toggle-river"></div>
+        </div>
+        <div class="sound-volume">
+          <span class="volume-icon">🔊</span>
+          <input type="range" class="volume-slider" id="volume-river" min="0" max="100" value="50" oninput="setVolume('river', this.value)">
+          <span class="volume-value" id="value-river">50%</span>
+        </div>
+      </div>
+
+      <div class="sound-card" id="sound-ocean">
+        <div class="sound-header" onclick="toggleSound('ocean')">
+          <div class="sound-info">
+            <span class="sound-icon">🌊</span>
+            <span class="sound-name">คลื่นทะเล</span>
+          </div>
+          <div class="sound-toggle" id="toggle-ocean"></div>
+        </div>
+        <div class="sound-volume">
+          <span class="volume-icon">🔊</span>
+          <input type="range" class="volume-slider" id="volume-ocean" min="0" max="100" value="50" oninput="setVolume('ocean', this.value)">
+          <span class="volume-value" id="value-ocean">50%</span>
+        </div>
+      </div>
+
+      <div class="sound-card" id="sound-forest">
+        <div class="sound-header" onclick="toggleSound('forest')">
+          <div class="sound-info">
+            <span class="sound-icon">🌲</span>
+            <span class="sound-name">ป่าไม้</span>
+          </div>
+          <div class="sound-toggle" id="toggle-forest"></div>
+        </div>
+        <div class="sound-volume">
+          <span class="volume-icon">🔊</span>
+          <input type="range" class="volume-slider" id="volume-forest" min="0" max="100" value="50" oninput="setVolume('forest', this.value)">
+          <span class="volume-value" id="value-forest">50%</span>
+        </div>
+      </div>
+
+      <div class="sound-card" id="sound-wind">
+        <div class="sound-header" onclick="toggleSound('wind')">
+          <div class="sound-info">
+            <span class="sound-icon">🍃</span>
+            <span class="sound-name">ลมพัด</span>
+          </div>
+          <div class="sound-toggle" id="toggle-wind"></div>
+        </div>
+        <div class="sound-volume">
+          <span class="volume-icon">🔊</span>
+          <input type="range" class="volume-slider" id="volume-wind" min="0" max="100" value="50" oninput="setVolume('wind', this.value)">
+          <span class="volume-value" id="value-wind">50%</span>
+        </div>
+      </div>
+
+      <div class="sound-card" id="sound-fire">
+        <div class="sound-header" onclick="toggleSound('fire')">
+          <div class="sound-info">
+            <span class="sound-icon">🔥</span>
+            <span class="sound-name">ไฟกระโดด</span>
+          </div>
+          <div class="sound-toggle" id="toggle-fire"></div>
+        </div>
+        <div class="sound-volume">
+          <span class="volume-icon">🔊</span>
+          <input type="range" class="volume-slider" id="volume-fire" min="0" max="100" value="50" oninput="setVolume('fire', this.value)">
+          <span class="volume-value" id="value-fire">50%</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 12px; text-align: center; font-size: 11px; color: var(--muted);">
+      💡 เคล็ดลับ: ผสมหลายเสียงเพื่อสร้าง Soundscape ของคุณเอง
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-title">สถิติการฝึกสมาธิ</div>
+    </div>
+    <div class="dash-grid">
+      <div class="dash-card">
+        <h3>จำนวนครั้ง</h3>
+        <div class="dash-big" id="meditationCount">0</div>
+        <div class="dash-label">ครั้ง</div>
+      </div>
+      <div class="dash-card">
+        <h3>เวลารวม</h3>
+        <div class="dash-big" id="meditationMinutes">0</div>
+        <div class="dash-label">นาที</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODE 2: RELEASE -->
+<div class="mode" id="mode2">
+  <div class="card">
+    <div class="section-head">
+      <div class="section-concept">LETTING GO</div>
+      <div class="section-title">ปล่อยความกังวล</div>
+      <div class="section-desc">เขียนสิ่งที่กังวล แล้วปล่อยมันไป</div>
+    </div>
+    <textarea id="worryText" rows="4" placeholder="สิ่งที่คุณกังวล..."></textarea>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="releaseWorry()">🌬️ ปล่อยวาง</button>
+    </div>
+    <div id="worry-output"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-concept">TEMPORARY</div>
+      <div class="section-title">เก็บความเศร้า (จางใน 7 วัน)</div>
+      <div class="section-desc">บางครั้งเราต้องการเก็บมัน แต่ไม่ตลอดไป</div>
+    </div>
+    <textarea id="sadText" rows="3" placeholder="สิ่งที่ทำให้เศร้า..."></textarea>
+    <div class="btn-row">
+      <button class="btn btn-soft" onclick="saveSadness()">🌙 เก็บไว้ชั่วคราว</button>
+    </div>
+    <div id="sadList" style="margin-top: 14px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-title">สถิติการปล่อยวาง</div>
+    </div>
+    <div class="dash-card">
+      <h3>ปล่อยวางแล้ว</h3>
+      <div class="dash-big" id="releaseCount">0</div>
+      <div class="dash-label">ครั้ง</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODE 3: GROWTH -->
+<div class="mode" id="mode3">
+  <div class="card">
+    <div class="section-head">
+      <div class="section-concept">KINTSUGI</div>
+      <div class="section-title">รอยแตก + บทเรียน = ความงาม</div>
+      <div class="section-desc">เปลี่ยนความผิดพลาดให้กลายเป็นภูมิปัญญา</div>
+    </div>
+    <input type="text" id="mistakeText" placeholder="ผิดพลาด / สิ่งที่เกิดขึ้น">
+    <textarea id="lessonText" rows="3" placeholder="บทเรียนที่ได้..." style="margin-top: 10px;"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="doKintsugi()">✨ สร้างทอง</button>
+    </div>
+    <div id="kintsugi-wrap">
+      <canvas id="kintsugi-canvas" width="600" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-concept">DAILY TASKS</div>
+      <div class="section-title">สิ่งเล็กๆ ที่ทำวันนี้</div>
+    </div>
+    <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+      <input type="text" id="newTask" placeholder="เพิ่มสิ่งที่จะทำ...">
+      <button class="btn btn-soft" onclick="addTask()">➕</button>
+    </div>
+    <ul id="taskList"></ul>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-concept">IKIGAI</div>
+      <div class="section-title">เหตุผลที่ตื่นขึ้นมาทุกวัน</div>
+      <div class="section-desc">สร้างสรรค์สิ่งที่ทำค่างไว้</div>
+    </div>
+    <div class="ikigai-grid">
+      <textarea class="ikigai-input" id="iki1" rows="2" placeholder="1. สิ่งที่เรารัก และมีความสุขกับมันที่ได้ทำ คืออะไร?"></textarea>
+      <textarea class="ikigai-input" id="iki2" rows="2" placeholder="2. สิ่งที่โลกนี้/ประโยชน์ต่อโลก คืออะไร?"></textarea>
+      <textarea class="ikigai-input" id="iki3" rows="2" placeholder="3. สิ่งที่เราทำได้ดี คืออะไร?"></textarea>
+      <textarea class="ikigai-input" id="iki4" rows="2" placeholder="4. สิ่งที่สร้างรายได้ให้เรา คืออะไร?"></textarea>
+      <div id="ikigaiCenter">กรอกทั้ง 4 ช่อง เพื่อค้นหาเข็มทิศของคุณ</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveIkigai()">💫 บันทึก</button>
+    </div>
+    <div id="ikigaiDiagram" style="margin-top: 20px; display: none;">
+      <canvas id="ikigai-canvas" width="600" height="600"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- MODE 4: DASHBOARD (ภาพรวม) -->
+<div class="mode" id="mode4">
+  <div class="card quote-card">
+    <div class="quote-text" id="dailyQuote">กำลังโหลดคำคมวันนี้...</div>
+    <div class="quote-author" id="quoteAuthor"></div>
+  </div>
+
+  <div class="section-head">
+    <div class="section-title">สถานะวันนี้</div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="dash-card">
+      <h3>🔥 Streak</h3>
+      <div class="dash-big" id="dashStreak">0</div>
+      <div class="dash-label">วันต่อเนื่อง</div>
+      <div class="dash-progress">
+        <div class="dash-progress-fill" id="streakProgress" style="width: 0%"></div>
+      </div>
+      <div class="dash-label" style="margin-top: 8px;">Longest: <span id="longestStreak">0</span> วัน</div>
+    </div>
+
+    <div class="dash-card">
+      <h3>⭐ แต้มสะสม</h3>
+      <div class="dash-big" id="dashPoints">0</div>
+      <div class="dash-label">คะแนน</div>
+      <div class="dash-progress">
+        <div class="dash-progress-fill" id="levelProgress" style="width: 0%"></div>
+      </div>
+      <div class="dash-label" style="margin-top: 8px;">ถึง Level ถัดไป: <span id="pointsToNext">500</span></div>
+    </div>
+
+    <div class="dash-card">
+      <h3>🏆 Achievements</h3>
+      <div class="dash-big" id="dashAchievements">0/12</div>
+      <div class="dash-label">ปลดล็อกแล้ว</div>
+      <div class="dash-progress">
+        <div class="dash-progress-fill" id="achievementProgress" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <h3>🎯 เป้าหมายสัปดาห์นี้</h3>
+      <div class="dash-label">บันทึกอารมณ์: <span id="weekMoodCount">0/7</span></div>
+      <div class="dash-progress">
+        <div class="dash-progress-fill" id="weekMoodProgress" style="width: 0%"></div>
+      </div>
+      <div class="dash-label" style="margin-top: 12px;">ฝึกสมาธิ: <span id="weekMeditationCount">0</span>/<span id="weekMeditationGoal">5</span></div>
+      <div class="dash-progress">
+        <div class="dash-progress-fill" id="weekMeditationProgress" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-head" style="margin-top: 20px;">
+    <div class="section-title">ความสำเร็จล่าสุด</div>
+  </div>
+  <div class="badges-row" id="dashboardBadges"></div>
+
+  <div class="section-head" style="margin-top: 20px;">
+    <div class="section-title">กิจกรรมเร็วๆ นี้</div>
+  </div>
+  <div class="card">
+    <div id="recentActivities"></div>
+  </div>
+</div>
+
+<!-- MODE 5: ANALYTICS -->
+<div class="mode" id="mode5">
+  <div class="section-head">
+    <div class="section-title">สถิติและวิเคราะห์</div>
+    <div class="section-desc">ข้อมูลเชิงลึกเกี่ยวกับการดูแลจิตใจของคุณ</div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="dash-card">
+      <h3>วันที่บันทึกอารมณ์</h3>
+      <div class="dash-big" id="totalMoodDays">0</div>
+      <div class="dash-label">วัน</div>
+    </div>
+    <div class="dash-card">
+      <h3>อารมณ์เฉลี่ย</h3>
+      <div class="dash-big" id="avgMood">-</div>
+      <div class="dash-label">คะแนน</div>
+    </div>
+    <div class="dash-card">
+      <h3>Gratitude</h3>
+      <div class="dash-big" id="totalGratitude">0</div>
+      <div class="dash-label">รายการ</div>
+    </div>
+    <div class="dash-card">
+      <h3>เวลาฝึกสมาธิ</h3>
+      <div class="dash-big" id="totalMeditation">0</div>
+      <div class="dash-label">นาที</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-title">ความสำเร็จที่ปลดล็อก</div>
+    </div>
+    <div class="badges-row" id="allBadges"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-title">Export ข้อมูล</div>
+      <div class="section-desc">ดาวน์โหลดข้อมูลของคุณ</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-soft" onclick="exportData()">📥 Export JSON</button>
+      <button class="btn btn-soft" onclick="exportSummary()">📊 Export สรุป</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODE 6: SHARE -->
+<div class="mode" id="mode6">
+  <div class="section-head">
+    <div class="section-title">แชร์ความสำเร็จของคุณ</div>
+    <div class="section-desc">สร้างแรงบันดาลใจให้กับเพื่อนๆ ด้วยการแชร์ความก้าวหน้าของคุณ</div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-concept">QUICK SHARE</div>
+      <div class="section-title">แชร์เร็ว</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="shareStreak()">🔥 แชร์ Streak</button>
+      <button class="btn btn-primary" onclick="shareLevel()">🏆 แชร์ Level</button>
+      <button class="btn btn-primary" onclick="shareWeeklySummary()">📊 สรุปสัปดาห์</button>
+    </div>
+  </div>
+
+  <div class="card challenge-card">
+    <h3>👥 ท้าเพื่อน</h3>
+    <p style="font-size: 13px; margin-top: 8px; opacity: 0.9;">ชวนเพื่อนมาดูแลจิตใจไปด้วยกัน</p>
+    <div class="challenge-input">
+      <input type="text" id="friendName" placeholder="ชื่อเพื่อน...">
+      <button class="btn btn-primary" onclick="createChallenge()">ส่งคำท้า</button>
+    </div>
+    <div class="challenge-list" id="challengeList"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-concept">CUSTOM</div>
+      <div class="section-title">สร้างการ์ดแชร์แบบกำหนดเอง</div>
+    </div>
+    <div style="margin: 14px 0;">
+      <label style="display: block; margin-bottom: 8px; font-weight: 600;">เลือกธีม:</label>
+      <div class="btn-row">
+        <button class="btn btn-soft" onclick="setShareTheme('achievement')">🏆 Achievement</button>
+        <button class="btn btn-soft" onclick="setShareTheme('streak')">🔥 Streak</button>
+        <button class="btn btn-soft" onclick="setShareTheme('meditation')">🧘 Meditation</button>
+        <button class="btn btn-soft" onclick="setShareTheme('weekly')">📊 Weekly</button>
+      </div>
+    </div>
+    
+    <div class="share-card-preview">
+      <canvas id="shareCanvas" width="800" height="1000"></canvas>
+    </div>
+
+    <div class="share-buttons">
+      <button class="share-btn download" onclick="downloadShareCard()">
+        📥 ดาวน์โหลดรูป
+      </button>
+      <button class="share-btn facebook" onclick="shareToFacebook()">
+        📘 Facebook
+      </button>
+      <button class="share-btn instagram" onclick="shareToInstagram()">
+        📷 Instagram
+      </button>
+      <button class="share-btn twitter" onclick="shareToTwitter()">
+        🐦 Twitter
+      </button>
+      <button class="share-btn line" onclick="shareToLine()">
+        💬 LINE
+      </button>
+      <button class="share-btn copy" onclick="copyShareText()">
+        📋 คัดลอกข้อความ
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODE 7: SETTINGS -->
+<div class="mode" id="mode7">
+  <div class="card">
+    <div class="section-head">
+      <div class="section-title">ติดตั้งและการแจ้งเตือน</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="showInstallInstructions()" style="flex: 1;">
+        📱 ติดตั้งแอป
+      </button>
+      <button class="btn btn-primary" onclick="enableAppNotifications()" style="flex: 1;">
+        🔔 เปิดการแจ้งเตือน
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-title">เป้าหมายส่วนตัว</div>
+    </div>
+    <div class="setting-item">
+      <div>
+        <div class="setting-label">เป้าหมายฝึกสมาธิรายสัปดาห์</div>
+        <div class="setting-desc">จำนวนครั้งที่ต้องการฝึกต่อสัปดาห์</div>
+      </div>
+      <input type="number" id="meditationGoalInput" value="5" min="1" max="14" style="width: 60px; text-align: center;" onchange="saveGoals()">
+    </div>
+    <div class="setting-item">
+      <div>
+        <div class="setting-label">เตือนบันทึกอารมณ์</div>
+        <div class="setting-desc">เวลาที่ต้องการให้เตือน</div>
+      </div>
+      <input type="time" id="reminderTime" value="20:00" style="width: 100px;" onchange="saveGoals()">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-title">การแจ้งเตือน</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-soft" onclick="testNotification()">🔔 ทดสอบการแจ้งเตือน</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div class="section-title">จัดการข้อมูล</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-soft" onclick="confirmReset()">🗑️ ล้างข้อมูลทั้งหมด</button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- BREATHING SCREEN -->
+<div id="ma-screen">
+  <button id="ma-close" onclick="closeMa()">✕</button>
+  <div id="breath-ring"></div>
+  <div id="breath-text">หายใจเข้า...</div>
+  <div id="ma-timer">5:00</div>
+  <div id="ma-hint">กดปิดได้ตลอดเวลา</div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification">
+  <button class="notif-close" onclick="hideNotification()">×</button>
+  <div class="notif-title" id="notifTitle">🎉 แจ้งเตือน</div>
+  <div class="notif-message" id="notifMessage">ข้อความแจ้งเตือน</div>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeShareModal()">×</button>
+    <h2 style="margin-bottom: 20px;">🎉 แชร์ความสำเร็จ!</h2>
+    <div class="share-card-preview">
+      <canvas id="modalShareCanvas" width="800" height="1000"></canvas>
+    </div>
+    <div class="share-buttons" style="margin-top: 20px;">
+      <button class="share-btn download" onclick="downloadModalCard()">📥 ดาวน์โหลด</button>
+      <button class="share-btn facebook" onclick="shareModalToFacebook()">📘 Facebook</button>
+      <button class="share-btn instagram" onclick="shareModalToInstagram()">📷 Instagram</button>
+      <button class="share-btn line" onclick="shareModalToLine()">💬 LINE</button>
+      <button class="share-btn copy" onclick="copyModalText()">📋 คัดลอก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STORAGE ───────────────────────────────────────────────
+const S = {
+  moods: JSON.parse(localStorage.getItem('wl_moods') || '[]'),
+  memories: JSON.parse(localStorage.getItem('wl_memories') || '[]'),
+  sadnesses: JSON.parse(localStorage.getItem('wl_sad') || '[]'),
+  ikigai: JSON.parse(localStorage.getItem('wl_ikigai') || '{"love":"","good":"","world":"","paid":""}'),
+  points: parseInt(localStorage.getItem('wl_points') || '0'),
+  level: parseInt(localStorage.getItem('wl_level') || '1'),
+  streak: parseInt(localStorage.getItem('wl_streak') || '0'),
+  longestStreak: parseInt(localStorage.getItem('wl_longest_streak') || '0'),
+  lastActive: localStorage.getItem('wl_last_active') || null,
+  achievements: JSON.parse(localStorage.getItem('wl_achievements') || '[]'),
+  meditations: JSON.parse(localStorage.getItem('wl_meditations') || '[]'),
+  releases: parseInt(localStorage.getItem('wl_releases') || '0'),
+  theme: localStorage.getItem('wl_theme') || 'light',
+  goals: JSON.parse(localStorage.getItem('wl_goals') || '{"weeklyMeditation": 5, "reminderTime": "20:00"}'),
+  challenges: JSON.parse(localStorage.getItem('wl_challenges') || '[]'),
+  breathMode: 'normal',
+  currentShareTheme: 'achievement'
+};
+
+// ─── ACHIEVEMENTS ──────────────────────────────────────────
+const achievements = [
+  { id: 'first_mood', name: 'เริ่มต้น', icon: '🎯', desc: 'บันทึกอารมณ์ครั้งแรก', points: 50, condition: () => S.moods.length >= 1 },
+  { id: 'streak_3', name: 'มุ่งมั่น', icon: '🔥', desc: 'Streak 3 วัน', points: 100, condition: () => S.streak >= 3 },
+  { id: 'streak_7', name: 'ต่อเนื่อง', icon: '⚡', desc: 'Streak 7 วัน', points: 200, condition: () => S.streak >= 7 },
+  { id: 'streak_30', name: 'นิสัย', icon: '💎', desc: 'Streak 30 วัน', points: 500, condition: () => S.streak >= 30 },
+  { id: 'meditation_10', name: 'สมาธิ', icon: '🧘', desc: 'ฝึกสมาธิ 10 ครั้ง', points: 150, condition: () => S.meditations.length >= 10 },
+  { id: 'meditation_50', name: 'นักสมาธิ', icon: '🌟', desc: 'ฝึกสมาธิ 50 ครั้ง', points: 400, condition: () => S.meditations.length >= 50 },
+  { id: 'gratitude_20', name: 'ขอบคุณ', icon: '🙏', desc: 'เขียน Gratitude 20 ครั้ง', points: 200, condition: () => S.memories.length >= 20 },
+  { id: 'release_10', name: 'ปล่อยวาง', icon: '🌬️', desc: 'ปล่อยวาง 10 ครั้ง', points: 150, condition: () => S.releases >= 10 },
+  { id: 'level_5', name: 'เติบโต', icon: '📈', desc: 'ถึง Level 5', points: 300, condition: () => S.level >= 5 },
+  { id: 'mood_100', name: 'นักบันทึก', icon: '📝', desc: 'บันทึกอารมณ์ 100 วัน', points: 500, condition: () => S.moods.length >= 100 },
+  { id: 'happy_week', name: 'สัปดาห์แห่งรอยยิ้ม', icon: '😊', desc: 'อารมณ์ดีทั้งสัปดาห์', points: 250, condition: checkHappyWeek },
+  { id: 'meditation_hour', name: 'ชั่วโมงแห่งสงบ', icon: '⏱️', desc: 'ฝึกสมาธิครบ 60 นาที', points: 300, condition: () => getTotalMeditationMinutes() >= 60 }
+];
+
+// ─── DAILY QUOTES ──────────────────────────────────────────
+const quotes = [
+  { text: 'ความสุขไม่ได้มาจากสิ่งที่เราทำ แต่มาจากวิธีที่เราทำ', author: 'ทัลมุด' },
+  { text: 'จิตใจที่สงบ คือพลังที่ยิ่งใหญ่ที่สุด', author: 'พุทธศาสนา' },
+  { text: 'ทุกวันคือโอกาสใหม่ที่จะเริ่มต้น', author: 'ภูมิปัญญา' },
+  { text: 'ความสุขอยู่ที่การยอมรับ ไม่ใช่การต่อสู้', author: 'ปรัชญาตะวันออก' },
+  { text: 'ลมหายใจคือสะพานเชื่อมร่างกายและจิตใจ', author: 'Thích Nhất Hạnh' },
+  { text: 'วันนี้เป็นของขวัญ นั่นคือเหตุผลที่เรียกว่า Present', author: 'ภูมิปัญญา' },
+  { text: 'ความผิดพลาดคือครูที่ดีที่สุด', author: 'ญี่ปุ่น' },
+  { text: 'เราไม่สามารถหยุดคลื่นได้ แต่เราสามารถเรียนรู้ที่จะโต้คลื่น', author: 'Jon Kabat-Zinn' },
+  { text: 'จงมุ่งมั่น แต่อย่าเคร่งครัดกับตัวเอง', author: 'ภูมิปัญญา' },
+  { text: 'ความสงบเริ่มต้นจากภายใน', author: 'พุทธศาสนา' }
+];
+
+// ─── INIT ──────────────────────────────────────────────────
+// ─── THEME ─────────────────────────────────────────────────
+function toggleTheme() {
+  S.theme = S.theme === 'light' ? 'dark' : 'light';
+  localStorage.setItem('wl_theme', S.theme);
+  applyTheme();
+  drawShareCard(); // Redraw share card with new theme
+}
+
+function applyTheme() {
+  if (S.theme === 'dark') {
+    document.body.setAttribute('data-theme', 'dark');
+    document.querySelector('.theme-toggle').textContent = '☀️';
+  } else {
+    document.body.removeAttribute('data-theme');
+    document.querySelector('.theme-toggle').textContent = '🌙';
+  }
+}
+
+// ─── UI UPDATES ────────────────────────────────────────────
+function updateAllUI() {
+  document.getElementById('headerStreak').textContent = S.streak;
+  document.getElementById('headerPoints').textContent = S.points;
+  document.getElementById('headerLevel').textContent = S.level;
+}
+
+function showDailyQuote() {
+  const today = new Date().toDateString();
+  const seed = today.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+  const quote = quotes[seed % quotes.length];
+  document.getElementById('dailyQuote').textContent = `"${quote.text}"`;
+  document.getElementById('quoteAuthor').textContent = `— ${quote.author}`;
+}
+
+// ─── NAVIGATION ────────────────────────────────────────────
+function showMode(idx) {
+  const modes = document.querySelectorAll('.mode');
+  const btns = document.querySelectorAll('nav button');
+  modes.forEach((m, i) => {
+    m.classList.toggle('active', i === idx);
+  });
+  btns.forEach((b, i) => {
+    b.classList.toggle('active', i === idx);
+  });
+}
+
+// ─── MOOD ──────────────────────────────────────────────────
+const moodResponses = {
+  1: 'เข้าใจว่าวันนี้ไม่ใช่วันที่ดี อยากให้รู้ว่าคุณไม่ได้อยู่คนเดียว 💙',
+  2: 'วันนี้อาจจะไม่ค่อยดี แต่พรุ่งนี้เป็นโอกาสใหม่ ค่อยๆ ไป 🌱',
+  3: 'วันธรรมดาๆ ก็โอเค บางทีความสงบก็อยู่ในความเรียบง่าย ☁️',
+  4: 'ดีใจที่คุณรู้สึกดี! เก็บพลังงานนี้ไว้นะ ✨',
+  5: 'วันนี้เยี่ยมมาก! ขอให้รอยยิ้มนี้อยู่กับคุณต่อไป 🌟'
+};
+
+function selectMood(val, btn) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('moodResponse').textContent = moodResponses[val];
+  saveMood(val);
+  addPoints(20);
+  checkAchievements();
+}
+
+function saveMood(val) {
+  const today = new Date().toDateString();
+  const idx = S.moods.findIndex(m => m.date === today);
+  if (idx >= 0) S.moods[idx].val = val;
+  else S.moods.push({date: today, val});
+  localStorage.setItem('wl_moods', JSON.stringify(S.moods));
+  updateStreak();
+  renderChart();
+  renderMoodCalendar();
+  renderDashboard();
+  renderAnalytics();
+}
+
+function updateStreak() {
+  const today = new Date();
+  const todayStr = today.toDateString();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toDateString();
+  
+  const hasToday = S.moods.find(m => m.date === todayStr);
+  const hasYesterday = S.moods.find(m => m.date === yesterdayStr);
+  
+  if (hasToday) {
+    if (S.lastActive !== todayStr) {
+      if (S.lastActive === yesterdayStr || S.streak === 0) {
+        S.streak++;
+      } else {
+        S.streak = 1;
+      }
+      S.lastActive = todayStr;
+    }
+  }
+  
+  if (S.streak > S.longestStreak) {
+    S.longestStreak = S.streak;
+    localStorage.setItem('wl_longest_streak', S.longestStreak);
+  }
+  
+  localStorage.setItem('wl_streak', S.streak);
+  localStorage.setItem('wl_last_active', S.lastActive);
+  updateAllUI();
+}
+
+function renderChart() {
+  const chart = document.getElementById('moodChart');
+  chart.innerHTML = '';
+  const days = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    const entry = S.moods.find(m => m.date === d.toDateString());
+    const val = entry ? entry.val : -1;
+    const h = val >= 0 ? Math.round((val/5)*60) + 6 : 4;
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    col.innerHTML = `<div class="bar${val<0?' empty':''}" style="height:${h}px;opacity:${val>=0?1:0.25}" title="${val >= 0 ? 'อารมณ์: ' + val + '/5' : 'ยังไม่บันทึก'}"></div><div class="bar-label">${days[d.getDay()]}</div>`;
+    chart.appendChild(col);
+  }
+  const el = document.getElementById('streakDots');
+  el.innerHTML = '';
+  let streak = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    if (S.moods.find(m => m.date === d.toDateString())) streak++;
+    else break;
+  }
+  for (let i = 0; i < 7; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'streak-dot' + (i < streak ? ' on' : '');
+    el.appendChild(dot);
+  }
+}
+
+function renderMoodCalendar() {
+  const container = document.getElementById('moodCalendar');
+  container.innerHTML = '';
+  const today = new Date();
+  const moodEmojis = ['', '😔', '😕', '😐', '🙂', '😊'];
+  
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const dateStr = d.toDateString();
+    const entry = S.moods.find(m => m.date === dateStr);
+    const mood = entry ? entry.val : 0;
+    
+    const dayEl = document.createElement('div');
+    dayEl.className = 'cal-day' + (mood > 0 ? ' has-mood' : '') + (i === 0 ? ' today' : '');
+    dayEl.innerHTML = `
+      <div class="day-num">${d.getDate()}</div>
+      ${mood > 0 ? `<div class="day-mood">${moodEmojis[mood]}</div>` : ''}
+    `;
+    dayEl.title = `${d.toLocaleDateString('th-TH')}${mood > 0 ? '\nอารมณ์: ' + mood + '/5' : ''}`;
+    container.appendChild(dayEl);
+  }
+}
+
+// ─── MEMORIES ──────────────────────────────────────────────
+function saveMemory() {
+  const txt = document.getElementById('momentNote').value.trim();
+  if (!txt) return;
+  S.memories.unshift({text: txt, time: new Date().toLocaleString('th-TH')});
+  localStorage.setItem('wl_memories', JSON.stringify(S.memories));
+  document.getElementById('momentNote').value = '';
+  addPoints(15);
+  renderMemories();
+  checkAchievements();
+  showNotification('💾 บันทึก Gratitude', 'เพิ่ม +15 แต้ม');
+}
+
+function renderMemories() {
+  const list = S.memories.slice(0, 10);
+  document.getElementById('memoryList').innerHTML = list.length === 0 
+    ? '<p style="text-align: center; color: var(--muted); font-size: 13px;">ยังไม่มีบันทึก</p>'
+    : list.map(m =>
+      `<div class="memory-note"><div class="note-text">"${m.text}"</div><div class="note-age">${m.time}</div></div>`
+    ).join('');
+}
+
+// ─── MEDITATION ────────────────────────────────────────────
+let maInterval, maSec, breathCycle;
+
+function setBreathMode(mode, btn) {
+  S.breathMode = mode;
+  document.querySelectorAll('.breath-mode-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function startMa(mins) {
+  maSec = mins * 60;
+  document.getElementById('ma-screen').classList.add('show');
+  clearInterval(maInterval);
+  
+  S.meditations.push({
+    date: new Date().toISOString(),
+    duration: mins
+  });
+  localStorage.setItem('wl_meditations', JSON.stringify(S.meditations));
+  
+  updateMaTimer();
+  startBreathCycle();
+  
+  maInterval = setInterval(() => {
+    maSec--;
+    updateMaTimer();
+    if (maSec <= 0) { 
+      clearInterval(maInterval); 
+      closeMa(); 
+      completeMeditation(mins);
+    }
+  }, 1000);
+}
+
+function startBreathCycle() {
+  const modes = {
+    normal: { inhale: 4000, hold: 0, exhale: 4000, pause: 0 },
+    '478': { inhale: 4000, hold: 7000, exhale: 8000, pause: 0 },
+    box: { inhale: 4000, hold: 4000, exhale: 4000, pause: 4000 }
+  };
+  const mode = modes[S.breathMode];
+  let phase = 0;
+  const phases = ['หายใจเข้า...', 'กลั้นลม...', 'หายใจออก...', 'พัก...'];
+  const durations = [mode.inhale, mode.hold, mode.exhale, mode.pause];
+  
+  function nextPhase() {
+    if (durations[phase] === 0) {
+      phase = (phase + 1) % 4;
+      if (phase === 0 || durations[phase] === 0) nextPhase();
+      return;
+    }
+    document.getElementById('breath-text').textContent = phases[phase];
+    setTimeout(() => {
+      phase = (phase + 1) % 4;
+      nextPhase();
+    }, durations[phase]);
+  }
+  
+  nextPhase();
+}
+
+function updateMaTimer() {
+  const m = Math.floor(maSec/60), s = maSec%60;
+  document.getElementById('ma-timer').textContent = m + ':' + String(s).padStart(2,'0');
+}
+
+function closeMa() {
+  clearInterval(maInterval);
+  document.getElementById('ma-screen').classList.remove('show');
+  // Optional: Stop all ambient sounds when closing meditation
+  // stopAllSounds();
+}
+
+function completeMeditation(mins) {
+  const points = mins * 10;
+  addPoints(points);
+  checkAchievements();
+  renderDashboard();
+  renderAnalytics();
+  showNotification('🧘 เสร็จสิ้น!', `ฝึกสมาธิ ${mins} นาที +${points} แต้ม`);
+}
+
+function getTotalMeditationMinutes() {
+  return S.meditations.reduce((sum, m) => sum + m.duration, 0);
+}
+
+// ─── SOUNDS (Enhanced Web Audio API with Volume Control) ───
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const soundSources = {};
+const gainNodes = {};
+let audioUnlocked = false;
+
+// Unlock audio on mobile devices
+function unlockAudio() {
+  if (audioUnlocked) return;
+  
+  const unlock = () => {
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+    
+    // Play a silent buffer to unlock
+    const buffer = audioContext.createBuffer(1, 1, 22050);
+    const source = audioContext.createBufferSource();
+    source.buffer = buffer;
+    source.connect(audioContext.destination);
+    source.start(0);
+    
+    audioUnlocked = true;
+    document.removeEventListener('touchstart', unlock);
+    document.removeEventListener('touchend', unlock);
+    document.removeEventListener('click', unlock);
+  };
+  
+  document.addEventListener('touchstart', unlock, { once: true });
+  document.addEventListener('touchend', unlock, { once: true });
+  document.addEventListener('click', unlock, { once: true });
+}
+
+// Sound presets with improved parameters
+const soundPresets = {
+  rain: {
+    type: 'noise',
+    filter: { type: 'lowpass', frequency: 1000, Q: 0.5 },
+    baseVolume: 0.5
+  },
+  river: {
+    type: 'noise',
+    filter: { type: 'bandpass', frequency: 400, Q: 1.2 },
+    baseVolume: 0.4
+  },
+  ocean: {
+    type: 'noise',
+    filter: { type: 'lowpass', frequency: 600, Q: 0.8 },
+    baseVolume: 0.5,
+    modulation: { frequency: 0.2, depth: 0.3 }
+  },
+  forest: {
+    type: 'noise',
+    filter: { type: 'bandpass', frequency: 2000, Q: 0.6 },
+    baseVolume: 0.3,
+    chirp: true
+  },
+  wind: {
+    type: 'noise',
+    filter: { type: 'highpass', frequency: 300, Q: 0.4 },
+    baseVolume: 0.35,
+    modulation: { frequency: 0.15, depth: 0.4 }
+  },
+  fire: {
+    type: 'noise',
+    filter: { type: 'lowpass', frequency: 400, Q: 0.3 },
+    baseVolume: 0.4,
+    crackle: true
+  }
+};
+
+function createNoiseBuffer(duration = 2) {
+  const sampleRate = audioContext.sampleRate;
+  const bufferSize = sampleRate * duration;
+  const buffer = audioContext.createBuffer(1, bufferSize, sampleRate);
+  const data = buffer.getChannelData(0);
+  
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+  
+  return buffer;
+}
+
+function createSoundSource(soundName) {
+  const preset = soundPresets[soundName];
+  if (!preset) return null;
+  
+  // Create noise source
+  const source = audioContext.createBufferSource();
+  source.buffer = createNoiseBuffer();
+  source.loop = true;
+  
+  // Create filter
+  const filter = audioContext.createBiquadFilter();
+  filter.type = preset.filter.type;
+  filter.frequency.value = preset.filter.frequency;
+  filter.Q.value = preset.filter.Q;
+  
+  // Create gain node for volume control
+  const gainNode = audioContext.createGain();
+  gainNode.gain.value = preset.baseVolume * 0.5; // Start at 50%
+  
+  // Connect nodes
+  source.connect(filter);
+  
+  // Add modulation for ocean and wind
+  if (preset.modulation) {
+    const lfo = audioContext.createOscillator();
+    const lfoGain = audioContext.createGain();
+    
+    lfo.frequency.value = preset.modulation.frequency;
+    lfoGain.gain.value = preset.filter.frequency * preset.modulation.depth;
+    
+    lfo.connect(lfoGain);
+    lfoGain.connect(filter.frequency);
+    lfo.start();
+  }
+  
+  // Add subtle variations for forest and fire
+  if (preset.chirp || preset.crackle) {
+    const lfo2 = audioContext.createOscillator();
+    const lfoGain2 = audioContext.createGain();
+    
+    lfo2.type = 'square';
+    lfo2.frequency.value = preset.crackle ? 0.5 : 2;
+    lfoGain2.gain.value = preset.filter.frequency * 0.1;
+    
+    lfo2.connect(lfoGain2);
+    lfoGain2.connect(filter.frequency);
+    lfo2.start();
+  }
+  
+  filter.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  return { source, gainNode, filter };
+}
+
+function toggleSound(soundName) {
+  // Ensure audio context is running (for mobile)
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
+  }
+  
+  const card = document.getElementById(`sound-${soundName}`);
+  const toggle = document.getElementById(`toggle-${soundName}`);
+  
+  if (soundSources[soundName]) {
+    // Stop sound with fade out
+    const gainNode = gainNodes[soundName];
+    const currentGain = gainNode.gain.value;
+    
+    gainNode.gain.setValueAtTime(currentGain, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.3);
+    
+    setTimeout(() => {
+      soundSources[soundName].source.stop();
+      delete soundSources[soundName];
+      delete gainNodes[soundName];
+    }, 300);
+    
+    card.classList.remove('playing');
+    toggle.classList.remove('active');
+  } else {
+    // Start sound with fade in
+    const soundObj = createSoundSource(soundName);
+    if (!soundObj) return;
+    
+    const { source, gainNode } = soundObj;
+    
+    // Store references
+    soundSources[soundName] = soundObj;
+    gainNodes[soundName] = gainNode;
+    
+    // Get current volume from slider
+    const slider = document.getElementById(`volume-${soundName}`);
+    const targetVolume = (slider.value / 100) * soundPresets[soundName].baseVolume;
+    
+    // Fade in
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(targetVolume, audioContext.currentTime + 0.5);
+    
+    source.start(0);
+    
+    card.classList.add('playing');
+    toggle.classList.add('active');
+  }
+}
+
+function setVolume(soundName, value) {
+  const gainNode = gainNodes[soundName];
+  if (!gainNode) return;
+  
+  const preset = soundPresets[soundName];
+  const targetVolume = (value / 100) * preset.baseVolume;
+  
+  // Smooth volume change
+  gainNode.gain.setValueAtTime(gainNode.gain.value, audioContext.currentTime);
+  gainNode.gain.linearRampToValueAtTime(targetVolume, audioContext.currentTime + 0.1);
+  
+  document.getElementById(`value-${soundName}`).textContent = value + '%';
+}
+
+function stopAllSounds() {
+  Object.keys(soundSources).forEach(soundName => {
+    const gainNode = gainNodes[soundName];
+    if (gainNode) {
+      gainNode.gain.setValueAtTime(gainNode.gain.value, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.3);
+    }
+    
+    setTimeout(() => {
+      if (soundSources[soundName]) {
+        soundSources[soundName].source.stop();
+        delete soundSources[soundName];
+        delete gainNodes[soundName];
+      }
+      
+      const card = document.getElementById(`sound-${soundName}`);
+      const toggle = document.getElementById(`toggle-${soundName}`);
+      if (card) card.classList.remove('playing');
+      if (toggle) toggle.classList.remove('active');
+    }, 300);
+  });
+}
+
+function initSounds() {
+  // Unlock audio for mobile
+  unlockAudio();
+  
+  // Resume audio context on user interaction
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      // Optional: pause sounds when tab is hidden
+    } else {
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+    }
+  });
+}
+
+// ─── RELEASE ───────────────────────────────────────────────
+function releaseWorry() {
+  const txt = document.getElementById('worryText').value.trim();
+  if (!txt) return;
+  const out = document.getElementById('worry-output');
+  out.style.cssText = 'opacity:1;letter-spacing:0;filter:none;';
+  out.textContent = '"' + txt + '"';
+  document.getElementById('worryText').value = '';
+  
+  S.releases++;
+  localStorage.setItem('wl_releases', S.releases);
+  addPoints(10);
+  renderAnalytics();
+  checkAchievements();
+  
+  let op = 1;
+  const iv = setInterval(() => {
+    op -= 0.018;
+    out.style.opacity = op;
+    out.style.letterSpacing = (1-op)*12 + 'px';
+    out.style.filter = `blur(${(1-op)*5}px)`;
+    if (op <= 0) {
+      clearInterval(iv);
+      out.textContent = '✦ ปล่อยออกไปแล้ว';
+      out.style.cssText = 'opacity:0.5;color:var(--accent);letter-spacing:0.05em;filter:none;';
+    }
+  }, 35);
+}
+
+function saveSadness() {
+  const txt = document.getElementById('sadText').value.trim();
+  if (!txt) return;
+  S.sadnesses.unshift({text:txt, time:Date.now()});
+  localStorage.setItem('wl_sad', JSON.stringify(S.sadnesses));
+  document.getElementById('sadText').value = '';
+  addPoints(5);
+  renderSadnesses();
+}
+
+function renderSadnesses() {
+  const now = Date.now();
+  S.sadnesses = S.sadnesses.filter(s => (now - s.time) < 7*86400000);
+  localStorage.setItem('wl_sad', JSON.stringify(S.sadnesses));
+  
+  document.getElementById('sadList').innerHTML = S.sadnesses.length === 0
+    ? '<p style="text-align: center; color: var(--muted); font-size: 13px;">ไม่มีความเศร้าที่เก็บไว้</p>'
+    : S.sadnesses.map(s => {
+      const dLeft = Math.max(0, 7 - Math.floor((now-s.time)/86400000));
+      const op = 0.3 + (dLeft/7)*0.7;
+      return `<div class="sad-note" style="opacity:${op}"><div class="note-text">${s.text}</div><div class="note-age">จางใน ${dLeft} วัน</div></div>`;
+    }).join('');
+}
+
+// ─── KINTSUGI ──────────────────────────────────────────────
+function doKintsugi() {
+  const mistake = document.getElementById('mistakeText').value.trim();
+  const lesson = document.getElementById('lessonText').value.trim();
+  if (!mistake || !lesson) { alert('กรอกทั้ง 2 ช่องก่อนนะ'); return; }
+  const wrap = document.getElementById('kintsugi-wrap');
+  wrap.style.display = 'block';
+  const canvas = document.getElementById('kintsugi-canvas');
+  const ctx = canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#181410'; ctx.fillRect(0,0,W,H);
+  const cracks=[[60,30,200,110],[180,10,310,150],[280,50,420,170],[80,90,260,160],[350,20,540,130],[460,70,600,190],[100,140,350,180]];
+  ctx.strokeStyle='#2e2418'; ctx.lineWidth=1;
+  cracks.forEach(([x1,y1,x2,y2])=>{
+    ctx.beginPath();ctx.moveTo(x1,y1);
+    ctx.lineTo((x1+x2)/2+(Math.random()-.5)*20,(y1+y2)/2+(Math.random()-.5)*20);
+    ctx.lineTo(x2,y2);ctx.stroke();
+  });
+  let prog=0;
+  function drawGold(){
+    prog=Math.min(prog+0.025,1);
+    cracks.forEach(([x1,y1,x2,y2])=>{
+      const gx=x1+(x2-x1)*prog, gy=y1+(y2-y1)*prog;
+      const mx=(x1+x2)/2, my=(y1+y2)/2;
+      const gr=ctx.createLinearGradient(x1,y1,x2,y2);
+      gr.addColorStop(0,'#b5703a');gr.addColorStop(.5,'#f0d080');gr.addColorStop(1,'#b5703a');
+      ctx.strokeStyle=gr;ctx.lineWidth=2.5;
+      ctx.shadowColor='#f0d080';ctx.shadowBlur=10;
+      ctx.beginPath();ctx.moveTo(x1,y1);
+      ctx.lineTo(mx+(Math.random()-.5)*8,my+(Math.random()-.5)*8);
+      ctx.lineTo(gx,gy);ctx.stroke();ctx.shadowBlur=0;
+    });
+    if(prog>=1){
+      ctx.fillStyle='rgba(240,208,128,0.9)';
+      ctx.font='14px Sarabun,sans-serif';ctx.textAlign='center';
+      ctx.fillText('"'+lesson.slice(0,60)+'"',W/2,H-18);
+    }
+    if(prog<1)requestAnimationFrame(drawGold);
+  }
+  drawGold();
+  addPoints(25);
+}
+
+// ─── TASKS ─────────────────────────────────────────────────
+function toggleTask(el) {
+  el.classList.toggle('done');
+  el.nextElementSibling.classList.toggle('done');
+  el.textContent = el.classList.contains('done') ? '✓' : '';
+  if (el.classList.contains('done')) {
+    addPoints(5);
+  }
+}
+
+function addTask() {
+  const v=document.getElementById('newTask').value.trim();
+  if(!v) return;
+  const li=document.createElement('li');
+  li.className='task-item';
+  li.innerHTML=`<div class="task-check" onclick="toggleTask(this)"></div><span class="task-text">• ${v}</span>`;
+  document.getElementById('taskList').appendChild(li);
+  document.getElementById('newTask').value='';
+}
+
+// ─── IKIGAI ────────────────────────────────────────────────
+function saveIkigai() {
+  const iki={
+    love:document.getElementById('iki1').value,
+    good:document.getElementById('iki2').value,
+    world:document.getElementById('iki3').value,
+    paid:document.getElementById('iki4').value
+  };
+  localStorage.setItem('wl_ikigai',JSON.stringify(iki));
+  S.ikigai = iki;
+  const filled=Object.values(iki).filter(v=>v.trim()).length;
+  const c=document.getElementById('ikigaiCenter');
+  if(filled>=4){
+    c.textContent='✦ จุดที่สิ่งเหล่านี้มาบรรจบกัน คือเหตุผลที่คุณตื่นขึ้นมาทุกวัน';
+    c.style.background='linear-gradient(135deg,#b5703a,#7a4a22)';
+    c.style.color='white';
+    addPoints(100);
+    showNotification('✨ Ikigai สมบูรณ์!', 'คุณค้นพบเข็มทิศของชีวิต +100 แต้ม');
+    drawIkigaiDiagram();
+  } else {
+    c.textContent='กรอกเพิ่มอีก '+(4-filled)+' ช่อง เพื่อค้นหาเข็มทิศของคุณ';
+    c.style.background='var(--border)';
+    c.style.color='var(--muted)';
+    document.getElementById('ikigaiDiagram').style.display = 'none';
+  }
+}
+
+function drawIkigaiDiagram() {
+  const diagram = document.getElementById('ikigaiDiagram');
+  diagram.style.display = 'block';
+  
+  const canvas = document.getElementById('ikigai-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+  const centerX = W / 2;
+  const centerY = H / 2;
+  const radius = 180;
+  
+  // Clear canvas
+  ctx.clearRect(0, 0, W, H);
+  
+  // Background
+  ctx.fillStyle = '#faf8f4';
+  ctx.fillRect(0, 0, W, H);
+  
+  // Draw 4 circles with colors matching the image
+  const circles = [
+    { x: centerX, y: centerY - radius/2, color: 'rgba(255, 182, 193, 0.6)', label: 'สร้างสรรค์สิ่งที่\nทำค่างไว้' }, // Pink - top
+    { x: centerX + radius/2, y: centerY, color: 'rgba(255, 228, 196, 0.6)', label: 'จุดจ่อ แก้ไข' }, // Peach - right
+    { x: centerX, y: centerY + radius/2, color: 'rgba(152, 251, 152, 0.6)', label: 'พบคน' }, // Green - bottom
+    { x: centerX - radius/2, y: centerY, color: 'rgba(173, 216, 230, 0.6)', label: 'บรรเทาใจ' } // Blue - left
+  ];
+  
+  // Draw circles
+  circles.forEach(circle => {
+    ctx.beginPath();
+    ctx.arc(circle.x, circle.y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = circle.color;
+    ctx.fill();
+  });
+  
+  // Draw center circle (white)
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 80, 0, Math.PI * 2);
+  ctx.fillStyle = 'white';
+  ctx.fill();
+  ctx.strokeStyle = '#b5703a';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  
+  // Center text "IKIGAI" with emoji
+  ctx.fillStyle = '#b5703a';
+  ctx.font = 'bold 28px Sarabun';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🎉', centerX, centerY - 15);
+  ctx.font = 'bold 24px Sarabun';
+  ctx.fillStyle = '#5c4a9e';
+  ctx.fillText('IKIGAI', centerX, centerY + 15);
+  
+  // Labels for each circle
+  const labels = [
+    { text: 'สร้างสรรค์สิ่งที่\nทำค่างไว้', x: centerX, y: centerY - radius - 30, color: '#d63384' },
+    { text: 'จุดจ่อ แก้ไข', x: centerX + radius + 40, y: centerY, color: '#fd7e14' },
+    { text: 'พบคน', x: centerX, y: centerY + radius + 40, color: '#198754' },
+    { text: 'บรรเทาใจ', x: centerX - radius - 40, y: centerY, color: '#0dcaf0' }
+  ];
+  
+  labels.forEach(label => {
+    ctx.fillStyle = label.color;
+    ctx.font = 'bold 18px Sarabun';
+    const lines = label.text.split('\n');
+    lines.forEach((line, i) => {
+      ctx.fillText(line, label.x, label.y + (i * 22));
+    });
+  });
+  
+  // Intersection labels (smaller text)
+  ctx.font = '14px Sarabun';
+  ctx.fillStyle = '#666';
+  
+  const intersections = [
+    { text: 'Passion', x: centerX - radius/3, y: centerY - radius/3 },
+    { text: 'Mission', x: centerX + radius/3, y: centerY - radius/3 },
+    { text: 'Vocation', x: centerX + radius/3, y: centerY + radius/3 },
+    { text: 'Profession', x: centerX - radius/3, y: centerY + radius/3 }
+  ];
+  
+  intersections.forEach(int => {
+    ctx.fillText(int.text, int.x, int.y);
+  });
+  
+  // Title
+  ctx.font = 'bold 24px Sarabun';
+  ctx.fillStyle = '#5c4a9e';
+  ctx.fillText('แผนภาพ Ikigai ของฉัน', centerX, 40);
+}
+
+function loadIkigai() {
+  const iki=S.ikigai;
+  if(iki.love) document.getElementById('iki1').value=iki.love;
+  if(iki.good) document.getElementById('iki2').value=iki.good;
+  if(iki.world) document.getElementById('iki3').value=iki.world;
+  if(iki.paid) document.getElementById('iki4').value=iki.paid;
+  
+  // Check if all fields are filled and draw diagram
+  const filled = Object.values(iki).filter(v=>v.trim()).length;
+  if (filled >= 4) {
+    drawIkigaiDiagram();
+  }
+}
+
+// ─── GAMIFICATION ──────────────────────────────────────────
+function addPoints(pts) {
+  S.points += pts;
+  const newLevel = Math.floor(S.points / 500) + 1;
+  if (newLevel > S.level) {
+    S.level = newLevel;
+    showNotification('🎊 Level Up!', `ยินดีด้วย! คุณขึ้น Level ${S.level}`);
+  }
+  localStorage.setItem('wl_points', S.points);
+  localStorage.setItem('wl_level', S.level);
+  updateAllUI();
+  renderDashboard();
+}
+
+function checkAchievements() {
+  let newUnlocks = 0;
+  achievements.forEach(ach => {
+    if (!S.achievements.includes(ach.id) && ach.condition()) {
+      S.achievements.push(ach.id);
+      S.points += ach.points;
+      newUnlocks++;
+      showNotification(`🏆 ${ach.icon} ${ach.name}`, `${ach.desc} +${ach.points} แต้ม`);
+    }
+  });
+  if (newUnlocks > 0) {
+    localStorage.setItem('wl_achievements', JSON.stringify(S.achievements));
+    localStorage.setItem('wl_points', S.points);
+    renderDashboard();
+    renderAllBadges();
+  }
+}
+
+function checkHappyWeek() {
+  const today = new Date();
+  let allHappy = true;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const entry = S.moods.find(m => m.date === d.toDateString());
+    if (!entry || entry.val < 4) {
+      allHappy = false;
+      break;
+    }
+  }
+  return allHappy;
+}
+
+// ─── DASHBOARD ─────────────────────────────────────────────
+function renderDashboard() {
+  document.getElementById('dashStreak').textContent = S.streak;
+  document.getElementById('longestStreak').textContent = S.longestStreak;
+  document.getElementById('dashPoints').textContent = S.points;
+  document.getElementById('dashAchievements').textContent = `${S.achievements.length}/${achievements.length}`;
+  
+  const streakProgress = Math.min((S.streak / 30) * 100, 100);
+  document.getElementById('streakProgress').style.width = streakProgress + '%';
+  
+  const pointsInLevel = S.points % 500;
+  const levelProgress = (pointsInLevel / 500) * 100;
+  document.getElementById('levelProgress').style.width = levelProgress + '%';
+  document.getElementById('pointsToNext').textContent = 500 - pointsInLevel;
+  
+  const achievementProgress = (S.achievements.length / achievements.length) * 100;
+  document.getElementById('achievementProgress').style.width = achievementProgress + '%';
+  
+  const weekMoods = getThisWeekMoods();
+  document.getElementById('weekMoodCount').textContent = `${weekMoods}/7`;
+  document.getElementById('weekMoodProgress').style.width = (weekMoods / 7) * 100 + '%';
+  
+  const weekMeditations = getThisWeekMeditations();
+  document.getElementById('weekMeditationCount').textContent = weekMeditations;
+  document.getElementById('weekMeditationGoal').textContent = S.goals.weeklyMeditation;
+  document.getElementById('weekMeditationProgress').style.width = Math.min((weekMeditations / S.goals.weeklyMeditation) * 100, 100) + '%';
+  
+  const recentBadges = achievements.filter(a => S.achievements.includes(a.id)).slice(-4);
+  document.getElementById('dashboardBadges').innerHTML = recentBadges.map(b => `
+    <div class="badge unlocked">
+      <div class="badge-icon">${b.icon}</div>
+      <div class="badge-name">${b.name}</div>
+    </div>
+  `).join('');
+  
+  const activities = [];
+  if (S.moods.length > 0) {
+    const last = S.moods[S.moods.length - 1];
+    activities.push(`🎭 บันทึกอารมณ์ล่าสุด: ${new Date(last.date).toLocaleDateString('th-TH')}`);
+  }
+  if (S.meditations.length > 0) {
+    const last = S.meditations[S.meditations.length - 1];
+    activities.push(`🧘 ฝึกสมาธิ ${last.duration} นาที: ${new Date(last.date).toLocaleDateString('th-TH')}`);
+  }
+  if (S.memories.length > 0) {
+    activities.push(`🙏 เขียน Gratitude: ${S.memories[0].time}`);
+  }
+  
+  document.getElementById('recentActivities').innerHTML = activities.length === 0
+    ? '<p style="text-align: center; color: var(--muted); font-size: 13px;">ยังไม่มีกิจกรรม</p>'
+    : activities.map(a => `<div style="padding: 8px 0; border-bottom: 1px solid var(--border);">${a}</div>`).join('');
+  
+  document.getElementById('meditationCount').textContent = S.meditations.length;
+  document.getElementById('meditationMinutes').textContent = getTotalMeditationMinutes();
+}
+
+function getThisWeekMoods() {
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  weekStart.setHours(0, 0, 0, 0);
+  return S.moods.filter(m => new Date(m.date) >= weekStart).length;
+}
+
+function getThisWeekMeditations() {
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  weekStart.setHours(0, 0, 0, 0);
+  return S.meditations.filter(m => new Date(m.date) >= weekStart).length;
+}
+
+// ─── ANALYTICS ─────────────────────────────────────────────
+function renderAnalytics() {
+  document.getElementById('totalMoodDays').textContent = S.moods.length;
+  
+  const avgMood = S.moods.length > 0
+    ? (S.moods.reduce((sum, m) => sum + m.val, 0) / S.moods.length).toFixed(1)
+    : '-';
+  document.getElementById('avgMood').textContent = avgMood;
+  
+  document.getElementById('totalGratitude').textContent = S.memories.length;
+  document.getElementById('totalMeditation').textContent = getTotalMeditationMinutes();
+  document.getElementById('releaseCount').textContent = S.releases;
+}
+
+function renderAllBadges() {
+  const html = achievements.map(ach => {
+    const unlocked = S.achievements.includes(ach.id);
+    return `
+      <div class="badge ${unlocked ? 'unlocked' : ''}">
+        <div class="badge-icon">${ach.icon}</div>
+        <div class="badge-name">${ach.name}</div>
+        <div style="font-size: 10px; color: var(--muted); margin-top: 4px;">${ach.desc}</div>
+        <div style="font-size: 11px; color: var(--gold); margin-top: 4px; font-weight: 600;">${ach.points} แต้ม</div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('allBadges').innerHTML = html;
+}
+
+// ─── NOTIFICATIONS ─────────────────────────────────────────
+function showNotification(title, message) {
+  const notif = document.getElementById('notification');
+  document.getElementById('notifTitle').innerHTML = title;
+  document.getElementById('notifMessage').textContent = message;
+  notif.classList.add('show');
+  setTimeout(() => {
+    notif.classList.remove('show');
+  }, 4000);
+}
+
+function hideNotification() {
+  document.getElementById('notification').classList.remove('show');
+}
+
+function testNotification() {
+  showNotification('🔔 ทดสอบการแจ้งเตือน', 'ระบบแจ้งเตือนทำงานปกติ!');
+}
+
+function checkDailyReminder() {
+  const now = new Date();
+  const reminderTime = S.goals.reminderTime.split(':');
+  const reminderHour = parseInt(reminderTime[0]);
+  const reminderMinute = parseInt(reminderTime[1]);
+  
+  if (now.getHours() === reminderHour && now.getMinutes() === reminderMinute) {
+    const today = new Date().toDateString();
+    const hasToday = S.moods.find(m => m.date === today);
+    if (!hasToday) {
+      showNotification('💭 เวลาบันทึกอารมณ์', 'อย่าลืมบันทึกความรู้สึกวันนี้นะ');
+    }
+  }
+}
+
+// ─── SETTINGS ──────────────────────────────────────────────
+function saveGoals() {
+  S.goals.weeklyMeditation = parseInt(document.getElementById('meditationGoalInput').value);
+  S.goals.reminderTime = document.getElementById('reminderTime').value;
+  localStorage.setItem('wl_goals', JSON.stringify(S.goals));
+  renderDashboard();
+  showNotification('⚙️ บันทึกการตั้งค่า', 'เป้าหมายของคุณถูกบันทึกแล้ว');
+}
+
+function loadGoals() {
+  document.getElementById('meditationGoalInput').value = S.goals.weeklyMeditation;
+  document.getElementById('reminderTime').value = S.goals.reminderTime;
+}
+
+function confirmReset() {
+  if (confirm('คุณแน่ใจหรือว่าต้องการล้างข้อมูลทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้')) {
+    localStorage.clear();
+    location.reload();
+  }
+}
+
+// ─── EXPORT ────────────────────────────────────────────────
+function exportData() {
+  const data = {
+    moods: S.moods,
+    memories: S.memories,
+    meditations: S.meditations,
+    achievements: S.achievements,
+    stats: {
+      points: S.points,
+      level: S.level,
+      streak: S.streak,
+      longestStreak: S.longestStreak
+    },
+    exportDate: new Date().toISOString()
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `peacefulness-data-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  showNotification('📥 Export สำเร็จ', 'ดาวน์โหลดไฟล์ข้อมูลแล้ว');
+}
+
+function exportSummary() {
+  const summary = `
+=== ใจดี Pro - สรุปข้อมูล ===
+วันที่: ${new Date().toLocaleDateString('th-TH')}
+
+📊 สถิติภาพรวม
+- Level: ${S.level}
+- คะแนนรวม: ${S.points}
+- Streak: ${S.streak} วัน (สูงสุด: ${S.longestStreak} วัน)
+- Achievements: ${S.achievements.length}/${achievements.length}
+
+💭 อารมณ์
+- จำนวนวันที่บันทึก: ${S.moods.length}
+- อารมณ์เฉลี่ย: ${S.moods.length > 0 ? (S.moods.reduce((sum, m) => sum + m.val, 0) / S.moods.length).toFixed(1) : 'N/A'}/5
+
+🧘 การฝึกสมาธิ
+- จำนวนครั้ง: ${S.meditations.length}
+- เวลารวม: ${getTotalMeditationMinutes()} นาที
+
+🙏 Gratitude
+- บันทึกทั้งหมด: ${S.memories.length} รายการ
+
+🌬️ ปล่อยวาง
+- ปล่อยวางแล้ว: ${S.releases} ครั้ง
+
+=== สิ้นสุดรายงาน ===
+  `.trim();
+  
+  const blob = new Blob([summary], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `peacefulness-summary-${new Date().toISOString().split('T')[0]}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  showNotification('📊 Export สำเร็จ', 'ดาวน์โหลดสรุปข้อมูลแล้ว');
+}
+
+// ─── SOCIAL SHARING ────────────────────────────────────────
+
+// Share Card Drawing
+function drawShareCard(canvasId = 'shareCanvas') {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+  
+  // Background gradient
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#f2ede6');
+  bg.addColorStop(1, '#e8c99a');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+  
+  // Border
+  ctx.strokeStyle = '#b5703a';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(20, 20, W-40, H-40);
+  
+  // App logo
+  ctx.font = 'bold 48px Sarabun';
+  ctx.fillStyle = '#b5703a';
+  ctx.textAlign = 'center';
+  ctx.fillText('ใจดี...กับตัวเอง', W/2, 120);
+  
+  // Theme-specific content
+  switch(S.currentShareTheme) {
+    case 'streak':
+      drawStreakCard(ctx, W, H);
+      break;
+    case 'meditation':
+      drawMeditationCard(ctx, W, H);
+      break;
+    case 'weekly':
+      drawWeeklyCard(ctx, W, H);
+      break;
+    default:
+      drawAchievementCard(ctx, W, H);
+  }
+  
+  // Footer
+  ctx.font = '24px Sarabun';
+  ctx.fillStyle = '#7a6e60';
+  ctx.textAlign = 'center';
+  ctx.fillText('#ใจดีทุกวัน #MentalWellness', W/2, H-80);
+}
+
+function drawAchievementCard(ctx, W, H) {
+  const latestAch = achievements.filter(a => S.achievements.includes(a.id)).slice(-1)[0];
+  if (!latestAch) {
+    ctx.font = '32px Sarabun';
+    ctx.fillStyle = '#2a2118';
+    ctx.textAlign = 'center';
+    ctx.fillText('เริ่มต้นเส้นทางของคุณ', W/2, H/2);
+    return;
+  }
+  
+  ctx.font = '120px Arial';
+  ctx.fillText(latestAch.icon, W/2, 350);
+  
+  ctx.font = 'bold 56px Sarabun';
+  ctx.fillStyle = '#2a2118';
+  ctx.fillText(latestAch.name, W/2, 480);
+  
+  ctx.font = '36px Sarabun';
+  ctx.fillStyle = '#7a6e60';
+  ctx.fillText(latestAch.desc, W/2, 540);
+  
+  ctx.font = 'bold 48px Sarabun';
+  ctx.fillStyle = '#d4af37';
+  ctx.fillText(`+${latestAch.points} แต้ม`, W/2, 640);
+  
+  ctx.font = '32px Sarabun';
+  ctx.fillStyle = '#b5703a';
+  ctx.fillText(`Level ${S.level} | ${S.points} แต้มรวม`, W/2, 740);
+}
+
+function drawStreakCard(ctx, W, H) {
+  ctx.font = '180px Arial';
+  ctx.fillText('🔥', W/2, 360);
+  
+  ctx.font = 'bold 96px Sarabun';
+  ctx.fillStyle = '#2a2118';
+  ctx.fillText(`${S.streak} วัน`, W/2, 520);
+  
+  ctx.font = '42px Sarabun';
+  ctx.fillStyle = '#7a6e60';
+  ctx.fillText('บันทึกอารมณ์ต่อเนื่อง', W/2, 600);
+  
+  ctx.font = '36px Sarabun';
+  ctx.fillStyle = '#b5703a';
+  ctx.fillText(`สถิติสูงสุด: ${S.longestStreak} วัน`, W/2, 700);
+}
+
+function drawMeditationCard(ctx, W, H) {
+  ctx.font = '180px Arial';
+  ctx.fillText('🧘', W/2, 360);
+  
+  ctx.font = 'bold 72px Sarabun';
+  ctx.fillStyle = '#2a2118';
+  ctx.fillText(`${S.meditations.length} ครั้ง`, W/2, 500);
+  
+  ctx.font = '42px Sarabun';
+  ctx.fillStyle = '#7a6e60';
+  ctx.fillText('ฝึกสมาธิแล้ว', W/2, 570);
+  
+  ctx.font = 'bold 56px Sarabun';
+  ctx.fillStyle = '#4a7a5e';
+  ctx.fillText(`${getTotalMeditationMinutes()} นาที`, W/2, 670);
+  
+  ctx.font = '32px Sarabun';
+  ctx.fillStyle = '#7a6e60';
+  ctx.fillText('เวลารวม', W/2, 720);
+}
+
+function drawWeeklyCard(ctx, W, H) {
+  const weekMoods = getThisWeekMoods();
+  const weekMeditations = getThisWeekMeditations();
+  
+  ctx.font = 'bold 56px Sarabun';
+  ctx.fillStyle = '#2a2118';
+  ctx.fillText('สรุปสัปดาห์นี้', W/2, 240);
+  
+  // Mood tracking
+  ctx.font = '48px Arial';
+  ctx.fillText('📝', W/2, 360);
+  ctx.font = 'bold 42px Sarabun';
+  ctx.fillStyle = '#b5703a';
+  ctx.fillText(`บันทึกอารมณ์ ${weekMoods}/7 วัน`, W/2, 420);
+  
+  // Meditation
+  ctx.font = '48px Arial';
+  ctx.fillText('🧘', W/2, 540);
+  ctx.font = 'bold 42px Sarabun';
+  ctx.fillStyle = '#4a7a5e';
+  ctx.fillText(`ฝึกสมาธิ ${weekMeditations} ครั้ง`, W/2, 600);
+  
+  // Gratitude
+  const weekGratitude = S.memories.filter(m => {
+    const date = new Date(m.time);
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    return date >= weekStart;
+  }).length;
+  
+  ctx.font = '48px Arial';
+  ctx.fillText('🙏', W/2, 720);
+  ctx.font = 'bold 42px Sarabun';
+  ctx.fillStyle = '#8b6f9e';
+  ctx.fillText(`เขียน Gratitude ${weekGratitude} ครั้ง`, W/2, 780);
+}
+
+function setShareTheme(theme) {
+  S.currentShareTheme = theme;
+  drawShareCard();
+}
+
+// Quick Share Functions
+function shareStreak() {
+  S.currentShareTheme = 'streak';
+  drawShareCard('modalShareCanvas');
+  document.getElementById('shareModal').classList.add('show');
+}
+
+function shareLevel() {
+  S.currentShareTheme = 'achievement';
+  drawShareCard('modalShareCanvas');
+  document.getElementById('shareModal').classList.add('show');
+}
+
+function shareWeeklySummary() {
+  S.currentShareTheme = 'weekly';
+  drawShareCard('modalShareCanvas');
+  document.getElementById('shareModal').classList.add('show');
+}
+
+function closeShareModal() {
+  document.getElementById('shareModal').classList.remove('show');
+}
+
+// Download Functions
+function downloadShareCard() {
+  const canvas = document.getElementById('shareCanvas');
+  const url = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ใจดี-${S.currentShareTheme}-${Date.now()}.png`;
+  a.click();
+  showNotification('📥 ดาวน์โหลดสำเร็จ', 'บันทึกรูปภาพแล้ว');
+}
+
+function downloadModalCard() {
+  const canvas = document.getElementById('modalShareCanvas');
+  const url = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ใจดี-${S.currentShareTheme}-${Date.now()}.png`;
+  a.click();
+  showNotification('📥 ดาวน์โหลดสำเร็จ', 'บันทึกรูปภาพแล้ว');
+}
+
+// Social Share Functions
+function getShareText() {
+  switch(S.currentShareTheme) {
+    case 'streak':
+      return `🔥 ฉันบันทึกอารมณ์ต่อเนื่อง ${S.streak} วันแล้ว!\nมาดูแลจิตใจไปด้วยกันไหม?\n\n#ใจดีทุกวัน #MentalWellness`;
+    case 'meditation':
+      return `🧘 ฉันฝึกสมาธิมาแล้ว ${S.meditations.length} ครั้ง (${getTotalMeditationMinutes()} นาที)\nรู้สึกสงบมากขึ้น\n\n#ใจดีทุกวัน #Mindfulness`;
+    case 'weekly':
+      return `📊 สรุปสัปดาห์นี้:\n✅ บันทึกอารมณ์ ${getThisWeekMoods()}/7 วัน\n🧘 ฝึกสมาธิ ${getThisWeekMeditations()} ครั้ง\n\nการดูแลจิตใจคือการดูแลตัวเอง\n\n#ใจดีทุกวัน`;
+    default:
+      const latestAch = achievements.filter(a => S.achievements.includes(a.id)).slice(-1)[0];
+      return latestAch 
+        ? `🏆 ฉันปลดล็อก "${latestAch.name}"!\n${latestAch.desc}\n\n#ใจดีทุกวัน #Achievement`
+        : `🌟 เริ่มต้นเส้นทางดูแลจิตใจ\n\n#ใจดีทุกวัน`;
+  }
+}
+
+function shareToFacebook() {
+  const text = getShareText();
+  const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(text)}`;
+  window.open(url, '_blank', 'width=600,height=400');
+}
+
+function shareToInstagram() {
+  alert('📷 Instagram: กรุณาดาวน์โหลดรูปภาพแล้วแชร์ผ่าน Instagram App');
+  downloadShareCard();
+}
+
+function shareToTwitter() {
+  const text = getShareText();
+  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank', 'width=600,height=400');
+}
+
+function shareToLine() {
+  const text = getShareText();
+  const url = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank', 'width=600,height=400');
+}
+
+function copyShareText() {
+  const text = getShareText();
+  navigator.clipboard.writeText(text).then(() => {
+    showNotification('📋 คัดลอกแล้ว', 'คัดลอกข้อความไปยังคลิปบอร์ด');
+  });
+}
+
+// Modal Share Functions
+function shareModalToFacebook() {
+  shareToFacebook();
+  closeShareModal();
+}
+
+function shareModalToInstagram() {
+  downloadModalCard();
+  closeShareModal();
+  alert('📷 Instagram: กรุณาแชร์รูปที่ดาวน์โหลดผ่าน Instagram App');
+}
+
+function shareModalToLine() {
+  shareToLine();
+  closeShareModal();
+}
+
+function copyModalText() {
+  copyShareText();
+}
+
+// Challenges
+function createChallenge() {
+  const name = document.getElementById('friendName').value.trim();
+  if (!name) return;
+  
+  const challenge = {
+    friend: name,
+    type: 'mood_7day',
+    created: new Date().toISOString(),
+    status: 'pending'
+  };
+  
+  S.challenges.push(challenge);
+  localStorage.setItem('wl_challenges', JSON.stringify(S.challenges));
+  document.getElementById('friendName').value = '';
+  
+  const shareText = `👋 สวัสดี ${name}!\n\nฉันอยากชวนคุณมาดูแลจิตใจไปด้วยกัน 🌟\n\nท้าให้บันทึกอารมณ์ติดต่อกัน 7 วัน ไหม?\n\nลองใช้แอป ใจดี...กับตัวเอง กัน!\n\n#ใจดีทุกวัน`;
+  
+  navigator.clipboard.writeText(shareText).then(() => {
+    showNotification('👥 ส่งคำท้าแล้ว!', 'คัดลอกข้อความแล้ว ส่งให้เพื่อนเลย');
+  });
+  
+  renderChallenges();
+}
+
+function renderChallenges() {
+  const list = document.getElementById('challengeList');
+  if (S.challenges.length === 0) {
+    list.innerHTML = '<p style="text-align: center; opacity: 0.7; margin-top: 14px; font-size: 13px;">ยังไม่มีคำท้า</p>';
+    return;
+  }
+  
+  list.innerHTML = S.challenges.map((c, i) => `
+    <div class="challenge-item">
+      <div>
+        <strong>${c.friend}</strong><br>
+        <small>ท้าบันทึกอารมณ์ 7 วัน</small>
+      </div>
+      <div style="font-size: 24px;">⏳</div>
+    </div>
+  `).join('');
+}
+
+// ─── SPLASH & ONBOARDING ───────────────────────────────────
+let currentSlide = 0;
+const totalSlides = 6;
+
+function checkOnboarding() {
+  const hasSeenOnboarding = localStorage.getItem('wl_onboarding_complete');
+  console.log('🔍 Checking onboarding...', { hasSeenOnboarding });
+  
+  // Hide splash screen after 2.5 seconds
+  setTimeout(() => {
+    console.log('⏰ Hiding splash screen...');
+    document.getElementById('splashScreen').style.display = 'none';
+    
+    // Show onboarding if first time
+    if (!hasSeenOnboarding) {
+      console.log('✨ First time! Showing onboarding...');
+      showOnboarding();
+    } else {
+      console.log('✅ Already seen onboarding, skipping...');
+    }
+  }, 2500);
+}
+
+function showOnboarding() {
+  console.log('🎉 Showing onboarding overlay...');
+  const overlay = document.getElementById('onboardingOverlay');
+  if (overlay) {
+    overlay.classList.add('show');
+    console.log('✅ Onboarding overlay shown');
+  } else {
+    console.error('❌ onboardingOverlay element not found!');
+  }
+}
+
+function hideOnboarding() {
+  document.getElementById('onboardingOverlay').classList.remove('show');
+}
+
+function nextSlide() {
+  if (currentSlide < totalSlides - 1) {
+    currentSlide++;
+    updateSlides();
+  }
+}
+
+function goToSlide(index) {
+  currentSlide = index;
+  updateSlides();
+}
+
+function updateSlides() {
+  // Update slides
+  const slides = document.querySelectorAll('.onboarding-slide');
+  slides.forEach((slide, index) => {
+    slide.classList.toggle('active', index === currentSlide);
+  });
+  
+  // Update dots
+  const dots = document.querySelectorAll('.onboarding-dot');
+  dots.forEach((dot, index) => {
+    dot.classList.toggle('active', index === currentSlide);
+  });
+  
+  // Update buttons
+  const skipBtn = document.getElementById('skipBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const startBtn = document.getElementById('startBtn');
+  
+  if (currentSlide === totalSlides - 1) {
+    skipBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    startBtn.style.display = 'block';
+  } else {
+    skipBtn.style.display = 'block';
+    nextBtn.style.display = 'block';
+    startBtn.style.display = 'none';
+  }
+}
+
+function skipOnboarding() {
+  finishOnboarding();
+}
+
+function finishOnboarding() {
+  localStorage.setItem('wl_onboarding_complete', 'true');
+  hideOnboarding();
+  showNotification('🌸 ยินดีต้อนรับ!', 'เริ่มต้นเส้นทางดูแลจิตใจของคุณได้เลย');
+}
+
+// Reset onboarding (for testing or if user wants to see it again)
+window.resetOnboarding = function() {
+  localStorage.removeItem('wl_onboarding_complete');
+  currentSlide = 0;
+  updateSlides();
+  showOnboarding();
+}
+
+// ─── INIT ──────────────────────────────────────────────────
+function init() {
+  applyTheme();
+  updateAllUI();
+  renderChart();
+  renderMemories();
+  renderSadnesses();
+  renderMoodCalendar();
+  renderDashboard();
+  renderAnalytics();
+  renderAllBadges();
+  loadIkigai();
+  loadGoals();
+  showDailyQuote();
+  checkDailyReminder();
+  renderChallenges();
+  drawShareCard();
+  initSounds();
+  
+  // Check if user has seen onboarding
+  checkOnboarding();
+}
+
+// Wait for DOM to be ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+// ─── PWA & SERVICE WORKER ──────────────────────────────────
+let deferredPrompt;
+let isIOSDevice = false;
+
+// Check if iOS
+if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+  isIOSDevice = true;
+}
+
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then((registration) => {
+        console.log('✅ Service Worker registered:', registration.scope);
+        
+        // Request notification permission after registration
+        requestNotificationPermission(registration);
+        
+        // Setup daily reminder
+        setupDailyReminder(registration);
+      })
+      .catch((error) => {
+        console.log('❌ Service Worker registration failed:', error);
+      });
+  });
+}
+
+// Install prompt (Add to Home Screen)
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log('💾 beforeinstallprompt event fired');
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Show install prompt after onboarding
+  setTimeout(() => {
+    if (!localStorage.getItem('wl_install_prompted')) {
+      showInstallPrompt();
+    }
+  }, 5000); // Show 5 seconds after page load
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('✅ PWA installed successfully');
+  localStorage.setItem('wl_pwa_installed', 'true');
+  deferredPrompt = null;
+  
+  showNotification('🎉 ติดตั้งสำเร็จ!', 'ตอนนี้คุณสามารถเปิดแอปได้จากหน้าจอหลักแล้ว');
+});
+
+// Request Notification Permission
+async function requestNotificationPermission(registration) {
+  if (!('Notification' in window)) {
+    console.log('❌ Browser does not support notifications');
+    return;
+  }
+  
+  // Don't ask on first visit - wait for user engagement
+  const hasAsked = localStorage.getItem('wl_notification_asked');
+  if (!hasAsked) {
+    // Ask after user completes first action
+    return;
+  }
+  
+  if (Notification.permission === 'default') {
+    const permission = await Notification.permission;
+    
+    if (permission === 'granted') {
+      console.log('✅ Notification permission granted');
+      subscribeUserToPush(registration);
+    } else if (permission === 'denied') {
+      console.log('❌ Notification permission denied');
+    }
+  } else if (Notification.permission === 'granted') {
+    subscribeUserToPush(registration);
+  }
+}
+
+// Ask for notification permission (called after user action)
+function askNotificationPermission() {
+  if (!('Notification' in window)) {
+    return;
+  }
+  
+  if (Notification.permission === 'granted') {
+    return;
+  }
+  
+  // Show custom UI first
+  const modal = `
+    <div class="modal-overlay show" id="notificationModal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeNotificationModal()">×</button>
+        <div style="text-align: center;">
+          <div style="font-size: 64px; margin-bottom: 20px;">🔔</div>
+          <h2 style="font-size: 24px; margin-bottom: 15px; color: var(--accent);">
+            ${isIOSDevice ? 'เปิดการแจ้งเตือน' : 'เปิดการแจ้งเตือนไหม?'}
+          </h2>
+          <p style="color: var(--muted); line-height: 1.7; margin-bottom: 25px;">
+            ${isIOSDevice 
+              ? 'สำหรับ iPhone/iPad: กรุณากด "แชร์" แล้วเลือก "เพิ่มไปยังหน้าจอหลัก" เพื่อรับการแจ้งเตือน'
+              : 'รับการแจ้งเตือนทุกวันเพื่อบันทึกอารมณ์และดูแลจิตใจ'
+            }
+          </p>
+          ${!isIOSDevice ? `
+            <div class="btn-row">
+              <button class="btn btn-soft" onclick="closeNotificationModal()">ไว้ทีหลัง</button>
+              <button class="btn btn-primary" onclick="enableNotifications()">เปิดการแจ้งเตือน</button>
+            </div>
+          ` : `
+            <button class="btn btn-primary" onclick="closeNotificationModal()">เข้าใจแล้ว</button>
+          `}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modal);
+}
+
+function closeNotificationModal() {
+  const modal = document.getElementById('notificationModal');
+  if (modal) modal.remove();
+}
+
+async function enableNotifications() {
+  localStorage.setItem('wl_notification_asked', 'true');
+  closeNotificationModal();
+  
+  if (isIOSDevice) {
+    showInstallPromptIOS();
+    return;
+  }
+  
+  const permission = await Notification.requestPermission();
+  
+  if (permission === 'granted') {
+    showNotification('✅ เปิดการแจ้งเตือนแล้ว', 'คุณจะได้รับการแจ้งเตือนทุกวัน');
+    
+    // Register for push
+    if ('serviceWorker' in navigator) {
+      const registration = await navigator.serviceWorker.ready;
+      subscribeUserToPush(registration);
+    }
+  }
+}
+
+// Subscribe to push notifications
+async function subscribeUserToPush(registration) {
+  try {
+    // This would require a VAPID key from your server
+    // For client-side only, we'll use local notifications
+    console.log('✅ Ready for push notifications');
+  } catch (error) {
+    console.error('❌ Failed to subscribe to push:', error);
+  }
+}
+
+// Setup Daily Reminder (using setTimeout/setInterval)
+function setupDailyReminder(registration) {
+  // Check every hour if it's time to remind
+  setInterval(() => {
+    checkDailyReminder();
+  }, 60 * 60 * 1000); // Check every hour
+  
+  // Also check on page load
+  checkDailyReminder();
+}
+
+function checkDailyReminder() {
+  if (Notification.permission !== 'granted') return;
+  
+  const reminderTime = localStorage.getItem('wl_goals') 
+    ? JSON.parse(localStorage.getItem('wl_goals')).reminderTime 
+    : '20:00';
+  
+  const [hour, minute] = reminderTime.split(':').map(Number);
+  const now = new Date();
+  
+  // Check if it's the right time (within 5 minutes)
+  if (now.getHours() === hour && now.getMinutes() >= minute && now.getMinutes() < minute + 5) {
+    // Check if already notified today
+    const lastNotified = localStorage.getItem('wl_last_notified');
+    const today = new Date().toDateString();
+    
+    if (lastNotified !== today) {
+      sendDailyReminder();
+      localStorage.setItem('wl_last_notified', today);
+    }
+  }
+}
+
+function sendDailyReminder() {
+  const today = new Date().toDateString();
+  const hasLoggedToday = S.moods.some(m => m.date === today);
+  
+  if (!hasLoggedToday) {
+    const messages = [
+      'อย่าลืมบันทึกอารมณ์วันนี้นะ 💭',
+      'วันนี้คุณรู้สึกยังไงบ้าง? มาบันทึกกัน 🌸',
+      'ดูแลจิตใจไปด้วยกัน บันทึกอารมณ์วันนี้เลย ✨',
+      'เวลาดูแลตัวเองแล้ว มาบันทึกความรู้สึกกัน 🌟'
+    ];
+    
+    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+    
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      // Send through service worker
+      navigator.serviceWorker.ready.then((registration) => {
+        registration.showNotification('🌸 ใจดี...กับตัวเอง', {
+          body: randomMessage,
+          icon: '/icons/icon-192x192.png',
+          badge: '/icons/icon-72x72.png',
+          tag: 'daily-reminder',
+          vibrate: [200, 100, 200],
+          requireInteraction: false,
+          data: {
+            url: '/?mode=mood'
+          }
+        });
+      });
+    } else {
+      // Fallback to basic notification
+      new Notification('🌸 ใจดี...กับตัวเอง', {
+        body: randomMessage,
+        icon: '/icons/icon-192x192.png',
+        tag: 'daily-reminder'
+      });
+    }
+  }
+}
+
+// Install Prompt for Android/Desktop
+function showInstallPrompt() {
+  if (!deferredPrompt) {
+    if (isIOSDevice) {
+      showInstallPromptIOS();
+    }
+    return;
+  }
+  
+  const modal = `
+    <div class="modal-overlay show" id="installModal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeInstallModal()">×</button>
+        <div style="text-align: center;">
+          <div style="font-size: 64px; margin-bottom: 20px;">📱</div>
+          <h2 style="font-size: 24px; margin-bottom: 15px; color: var(--accent);">
+            ติดตั้งแอป "ใจดี...กับตัวเอง"
+          </h2>
+          <p style="color: var(--muted); line-height: 1.7; margin-bottom: 25px;">
+            ติดตั้งเป็นแอปบนเครื่องเพื่อการใช้งานที่สะดวกและรวดเร็วขึ้น<br>
+            • เปิดได้จากหน้าจอหลัก<br>
+            • ไม่ต้องเปิดเบราว์เซอร์<br>
+            • รับการแจ้งเตือนทุกวัน
+          </p>
+          <div class="btn-row">
+            <button class="btn btn-soft" onclick="closeInstallModal()">ไว้ทีหลัง</button>
+            <button class="btn btn-primary" onclick="installApp()">ติดตั้งเลย</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modal);
+  localStorage.setItem('wl_install_prompted', 'true');
+}
+
+function closeInstallModal() {
+  const modal = document.getElementById('installModal');
+  if (modal) modal.remove();
+}
+
+async function installApp() {
+  if (!deferredPrompt) return;
+  
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  
+  console.log(`User response to install prompt: ${outcome}`);
+  
+  if (outcome === 'accepted') {
+    console.log('✅ User accepted install prompt');
+  } else {
+    console.log('❌ User dismissed install prompt');
+  }
+  
+  closeInstallModal();
+  deferredPrompt = null;
+}
+
+// Install Prompt for iOS
+function showInstallPromptIOS() {
+  const modal = `
+    <div class="modal-overlay show" id="installModalIOS">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeInstallModalIOS()">×</button>
+        <div style="text-align: center;">
+          <div style="font-size: 64px; margin-bottom: 20px;">📱</div>
+          <h2 style="font-size: 24px; margin-bottom: 15px; color: var(--accent);">
+            ติดตั้งบน iPhone/iPad
+          </h2>
+          <div style="text-align: left; line-height: 2; margin: 25px 0;">
+            <p style="margin-bottom: 15px; font-weight: 600;">ทำตามขั้นตอนนี้:</p>
+            <p>1️⃣ กดปุ่ม <strong>แชร์</strong> (Share) <span style="font-size: 20px;">⎋</span> ด้านล่าง</p>
+            <p>2️⃣ เลื่อนหา <strong>"เพิ่มไปยังหน้าจอหลัก"</strong></p>
+            <p style="margin-left: 20px; color: var(--muted); font-size: 13px;">(Add to Home Screen)</p>
+            <p>3️⃣ กด <strong>"เพิ่ม"</strong> (Add)</p>
+          </div>
+          <div style="background: var(--accent-pale); padding: 15px; border-radius: 10px; margin-top: 20px;">
+            <p style="font-size: 13px; color: var(--accent);">
+              💡 หลังจากติดตั้ง คุณจะเปิดแอปได้จากหน้าจอหลักเหมือนแอปทั่วไป!
+            </p>
+          </div>
+          <button class="btn btn-primary" onclick="closeInstallModalIOS()" style="margin-top: 20px; width: 100%;">
+            เข้าใจแล้ว
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modal);
+}
+
+function closeInstallModalIOS() {
+  const modal = document.getElementById('installModalIOS');
+  if (modal) modal.remove();
+}
+
+// Add global function to manually trigger install prompt
+window.showInstallInstructions = function() {
+  if (isIOSDevice) {
+    showInstallPromptIOS();
+  } else {
+    showInstallPrompt();
+  }
+};
+
+// Add global function to manually ask for notifications
+window.enableAppNotifications = function() {
+  askNotificationPermission();
+};
+
+// Ask for notification permission after first mood log
+const originalSelectMood = selectMood;
+window.selectMood = function(val, btn) {
+  originalSelectMood(val, btn);
+  
+  // Ask for notification permission after first mood
+  const hasAsked = localStorage.getItem('wl_notification_asked');
+  if (!hasAsked && Notification.permission === 'default') {
+    setTimeout(() => {
+      askNotificationPermission();
+    }, 2000);
+  }
+};
+</script>
+</body>
+</html>
