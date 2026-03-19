@@ -2264,32 +2264,36 @@ function saveMood(val) {
   renderAnalytics();
 }
 
+// ✅ อัปเดตระบบนับวันต่อเนื่อง (Streak Calculation) ให้แม่นยำขึ้นแบบใช้ผลต่างของวัน
 function updateStreak() {
   const today = new Date();
   const todayStr = today.toDateString();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toDateString();
-  
+
   const hasToday = S.moods.find(m => m.date === todayStr);
-  const hasYesterday = S.moods.find(m => m.date === yesterdayStr);
-  
-  if (hasToday) {
-    if (S.lastActive !== todayStr) {
-      if (S.lastActive === yesterdayStr || S.streak === 0) {
-        S.streak++;
-      } else {
-        S.streak = 1;
+
+  if (hasToday && S.lastActive !== todayStr) {
+    if (!S.lastActive) {
+      S.streak = 1;
+    } else {
+      const lastDate = new Date(S.lastActive);
+      // เทียบผลต่างวันโดยไม่สนเวลา (ชั่วโมง/นาที)
+      const diffTime = Math.abs(today.setHours(0,0,0,0) - lastDate.setHours(0,0,0,0));
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) {
+        S.streak++; // บันทึกต่อเนื่องกัน
+      } else if (diffDays > 1) {
+        S.streak = 1; // ขาดช่วงไป ให้เริ่มนับ 1 ใหม่
       }
-      S.lastActive = todayStr;
     }
+    S.lastActive = todayStr;
   }
-  
+
   if (S.streak > S.longestStreak) {
     S.longestStreak = S.streak;
     localStorage.setItem('wl_longest_streak', S.longestStreak);
   }
-  
+
   localStorage.setItem('wl_streak', S.streak);
   localStorage.setItem('wl_last_active', S.lastActive);
   updateAllUI();
@@ -2419,65 +2423,41 @@ function startBreathCycle() {
   const breathCircle = document.querySelector('.breath-circle');
   const breathText = document.getElementById('breath-text');
   
-  console.log('🧘 Breath cycle started', {
-    mode: S.breathMode,
-    breathCircle: !!breathCircle,
-    breathText: !!breathText,
-    durations
-  });
-  
-  if (!breathCircle) {
-    console.error('❌ breath-circle element not found!');
-    return;
-  }
+  if (!breathCircle) return;
   
   function updateCircleAnimation() {
     if (!breathCircle) return;
     
     if (phase === 0) {
-      // Inhale - วงกลมขยาย
       breathCircle.style.animation = `breathe-in ${mode.inhale}ms ease-in-out forwards`;
-      console.log('→ Inhale: expanding circle');
     } else if (phase === 1 && mode.hold > 0) {
-      // Hold - วงกลมหยุด (ขนาดใหญ่)
       breathCircle.style.animation = 'none';
       breathCircle.style.transform = 'scale(1.8)';
       breathCircle.style.opacity = '1';
-      console.log('→ Hold: circle paused (large)');
     } else if (phase === 2) {
-      // Exhale - วงกลมหด
       breathCircle.style.animation = `breathe-out ${mode.exhale}ms ease-in-out forwards`;
-      console.log('→ Exhale: shrinking circle');
     } else if (phase === 3 && mode.pause > 0) {
-      // Pause - วงกลมหยุด (ขนาดเล็ก)
       breathCircle.style.animation = 'none';
       breathCircle.style.transform = 'scale(0.8)';
       breathCircle.style.opacity = '0.5';
-      console.log('→ Pause: circle paused (small)');
     }
   }
   
   function nextPhase() {
-    // Update text and animation
     const phaseText = phases[phase];
-    console.log(`Phase ${phase}: ${phaseText} (${durations[phase]}ms)`);
     
     if (breathText) {
       breathText.textContent = phaseText;
     }
     updateCircleAnimation();
     
-    // Schedule next phase
     setTimeout(() => {
       phase = (phase + 1) % 4;
-      
-      // Skip phases with 0 duration
       while (durations[phase] === 0 && phase !== 0) {
         phase = (phase + 1) % 4;
       }
-      
       nextPhase();
-    }, durations[phase] || 100); // Minimum 100ms to prevent infinite loop
+    }, durations[phase] || 100);
   }
   
   nextPhase();
@@ -2491,8 +2471,7 @@ function updateMaTimer() {
 function closeMa() {
   clearInterval(maInterval);
   document.getElementById('ma-screen').classList.remove('show');
-  // Optional: Stop all ambient sounds when closing meditation
-  // stopAllSounds();
+  stopAllSounds(); // ✅ เพิ่มคำสั่งหยุดเสียงทั้งหมดอัตโนมัติเมื่อออกจากโหมดทำสมาธิ (ประหยัดแบตเตอรี่)
 }
 
 function completeMeditation(mins) {
@@ -2508,26 +2487,35 @@ function getTotalMeditationMinutes() {
   return S.meditations.reduce((sum, m) => sum + m.duration, 0);
 }
 
-// ─── SOUNDS (Enhanced Web Audio API with Volume Control) ───
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+// ─── SOUNDS (✅ อัปเดตการจัดการ AudioContext ป้องกันเบราว์เซอร์บล็อก) ───
+let audioContext = null;
 const soundSources = {};
 const gainNodes = {};
 let audioUnlocked = false;
+
+// โหลด AudioContext เฉพาะเมื่อถูกเรียกใช้เพื่อป้องกัน Auto-play Policy Error
+function getAudioContext() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioContext;
+}
 
 // Unlock audio on mobile devices
 function unlockAudio() {
   if (audioUnlocked) return;
   
+  const ctx = getAudioContext();
   const unlock = () => {
-    if (audioContext.state === 'suspended') {
-      audioContext.resume();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
     }
     
     // Play a silent buffer to unlock
-    const buffer = audioContext.createBuffer(1, 1, 22050);
-    const source = audioContext.createBufferSource();
+    const buffer = ctx.createBuffer(1, 1, 22050);
+    const source = ctx.createBufferSource();
     source.buffer = buffer;
-    source.connect(audioContext.destination);
+    source.connect(ctx.destination);
     source.start(0);
     
     audioUnlocked = true;
@@ -2543,46 +2531,19 @@ function unlockAudio() {
 
 // Sound presets with improved parameters
 const soundPresets = {
-  rain: {
-    type: 'noise',
-    filter: { type: 'lowpass', frequency: 1000, Q: 0.5 },
-    baseVolume: 0.5
-  },
-  river: {
-    type: 'noise',
-    filter: { type: 'bandpass', frequency: 400, Q: 1.2 },
-    baseVolume: 0.4
-  },
-  ocean: {
-    type: 'noise',
-    filter: { type: 'lowpass', frequency: 600, Q: 0.8 },
-    baseVolume: 0.5,
-    modulation: { frequency: 0.2, depth: 0.3 }
-  },
-  forest: {
-    type: 'noise',
-    filter: { type: 'bandpass', frequency: 2000, Q: 0.6 },
-    baseVolume: 0.3,
-    chirp: true
-  },
-  wind: {
-    type: 'noise',
-    filter: { type: 'highpass', frequency: 300, Q: 0.4 },
-    baseVolume: 0.35,
-    modulation: { frequency: 0.15, depth: 0.4 }
-  },
-  fire: {
-    type: 'noise',
-    filter: { type: 'lowpass', frequency: 400, Q: 0.3 },
-    baseVolume: 0.4,
-    crackle: true
-  }
+  rain: { type: 'noise', filter: { type: 'lowpass', frequency: 1000, Q: 0.5 }, baseVolume: 0.5 },
+  river: { type: 'noise', filter: { type: 'bandpass', frequency: 400, Q: 1.2 }, baseVolume: 0.4 },
+  ocean: { type: 'noise', filter: { type: 'lowpass', frequency: 600, Q: 0.8 }, baseVolume: 0.5, modulation: { frequency: 0.2, depth: 0.3 } },
+  forest: { type: 'noise', filter: { type: 'bandpass', frequency: 2000, Q: 0.6 }, baseVolume: 0.3, chirp: true },
+  wind: { type: 'noise', filter: { type: 'highpass', frequency: 300, Q: 0.4 }, baseVolume: 0.35, modulation: { frequency: 0.15, depth: 0.4 } },
+  fire: { type: 'noise', filter: { type: 'lowpass', frequency: 400, Q: 0.3 }, baseVolume: 0.4, crackle: true }
 };
 
 function createNoiseBuffer(duration = 2) {
-  const sampleRate = audioContext.sampleRate;
+  const ctx = getAudioContext();
+  const sampleRate = ctx.sampleRate;
   const bufferSize = sampleRate * duration;
-  const buffer = audioContext.createBuffer(1, bufferSize, sampleRate);
+  const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
   const data = buffer.getChannelData(0);
   
   for (let i = 0; i < bufferSize; i++) {
@@ -2596,73 +2557,63 @@ function createSoundSource(soundName) {
   const preset = soundPresets[soundName];
   if (!preset) return null;
   
-  // Create noise source
-  const source = audioContext.createBufferSource();
+  const ctx = getAudioContext();
+  const source = ctx.createBufferSource();
   source.buffer = createNoiseBuffer();
   source.loop = true;
   
-  // Create filter
-  const filter = audioContext.createBiquadFilter();
+  const filter = ctx.createBiquadFilter();
   filter.type = preset.filter.type;
   filter.frequency.value = preset.filter.frequency;
   filter.Q.value = preset.filter.Q;
   
-  // Create gain node for volume control
-  const gainNode = audioContext.createGain();
+  const gainNode = ctx.createGain();
   gainNode.gain.value = preset.baseVolume * 0.5; // Start at 50%
   
-  // Connect nodes
   source.connect(filter);
   
-  // Add modulation for ocean and wind
   if (preset.modulation) {
-    const lfo = audioContext.createOscillator();
-    const lfoGain = audioContext.createGain();
-    
+    const lfo = ctx.createOscillator();
+    const lfoGain = ctx.createGain();
     lfo.frequency.value = preset.modulation.frequency;
     lfoGain.gain.value = preset.filter.frequency * preset.modulation.depth;
-    
     lfo.connect(lfoGain);
     lfoGain.connect(filter.frequency);
     lfo.start();
   }
   
-  // Add subtle variations for forest and fire
   if (preset.chirp || preset.crackle) {
-    const lfo2 = audioContext.createOscillator();
-    const lfoGain2 = audioContext.createGain();
-    
+    const lfo2 = ctx.createOscillator();
+    const lfoGain2 = ctx.createGain();
     lfo2.type = 'square';
     lfo2.frequency.value = preset.crackle ? 0.5 : 2;
     lfoGain2.gain.value = preset.filter.frequency * 0.1;
-    
     lfo2.connect(lfoGain2);
     lfoGain2.connect(filter.frequency);
     lfo2.start();
   }
   
   filter.connect(gainNode);
-  gainNode.connect(audioContext.destination);
+  gainNode.connect(ctx.destination);
   
   return { source, gainNode, filter };
 }
 
 function toggleSound(soundName) {
-  // Ensure audio context is running (for mobile)
-  if (audioContext.state === 'suspended') {
-    audioContext.resume();
+  const ctx = getAudioContext();
+  if (ctx.state === 'suspended') {
+    ctx.resume();
   }
   
   const card = document.getElementById(`sound-${soundName}`);
   const toggle = document.getElementById(`toggle-${soundName}`);
   
   if (soundSources[soundName]) {
-    // Stop sound with fade out
     const gainNode = gainNodes[soundName];
     const currentGain = gainNode.gain.value;
     
-    gainNode.gain.setValueAtTime(currentGain, audioContext.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.3);
+    gainNode.gain.setValueAtTime(currentGain, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
     
     setTimeout(() => {
       soundSources[soundName].source.stop();
@@ -2673,24 +2624,18 @@ function toggleSound(soundName) {
     card.classList.remove('playing');
     toggle.classList.remove('active');
   } else {
-    // Start sound with fade in
     const soundObj = createSoundSource(soundName);
     if (!soundObj) return;
     
     const { source, gainNode } = soundObj;
-    
-    // Store references
     soundSources[soundName] = soundObj;
     gainNodes[soundName] = gainNode;
     
-    // Get current volume from slider
     const slider = document.getElementById(`volume-${soundName}`);
     const targetVolume = (slider.value / 100) * soundPresets[soundName].baseVolume;
     
-    // Fade in
-    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-    gainNode.gain.linearRampToValueAtTime(targetVolume, audioContext.currentTime + 0.5);
-    
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(targetVolume, ctx.currentTime + 0.5);
     source.start(0);
     
     card.classList.add('playing');
@@ -2702,22 +2647,24 @@ function setVolume(soundName, value) {
   const gainNode = gainNodes[soundName];
   if (!gainNode) return;
   
+  const ctx = getAudioContext();
   const preset = soundPresets[soundName];
   const targetVolume = (value / 100) * preset.baseVolume;
   
-  // Smooth volume change
-  gainNode.gain.setValueAtTime(gainNode.gain.value, audioContext.currentTime);
-  gainNode.gain.linearRampToValueAtTime(targetVolume, audioContext.currentTime + 0.1);
-  
+  gainNode.gain.setValueAtTime(gainNode.gain.value, ctx.currentTime);
+  gainNode.gain.linearRampToValueAtTime(targetVolume, ctx.currentTime + 0.1);
   document.getElementById(`value-${soundName}`).textContent = value + '%';
 }
 
 function stopAllSounds() {
+  if (!audioContext) return;
+  const ctx = getAudioContext();
+  
   Object.keys(soundSources).forEach(soundName => {
     const gainNode = gainNodes[soundName];
     if (gainNode) {
-      gainNode.gain.setValueAtTime(gainNode.gain.value, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.3);
+      gainNode.gain.setValueAtTime(gainNode.gain.value, ctx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
     }
     
     setTimeout(() => {
@@ -2736,17 +2683,10 @@ function stopAllSounds() {
 }
 
 function initSounds() {
-  // Unlock audio for mobile
   unlockAudio();
-  
-  // Resume audio context on user interaction
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      // Optional: pause sounds when tab is hidden
-    } else {
-      if (audioContext.state === 'suspended') {
-        audioContext.resume();
-      }
+    if (!document.hidden && audioContext && audioContext.state === 'suspended') {
+      audioContext.resume();
     }
   });
 }
@@ -2816,38 +2756,29 @@ function doKintsugi() {
   const W = canvas.width, H = canvas.height;
   ctx.clearRect(0, 0, W, H);
   
-  // Background
   ctx.fillStyle = '#181410';
   ctx.fillRect(0, 0, W, H);
   
-  // Draw vessel shape (bowl/pot)
   const centerX = W / 2;
   const centerY = H / 2;
   const vesselWidth = 280;
   const vesselHeight = 140;
   
-  // Vessel body (dark ceramic)
   ctx.fillStyle = '#2a1f1a';
   ctx.strokeStyle = '#1a1410';
   ctx.lineWidth = 2;
   
   ctx.beginPath();
-  // Bowl shape
   ctx.ellipse(centerX, centerY - 20, vesselWidth / 2, vesselHeight / 2, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
   
-  // Define cracks on the vessel
   const cracks = [
-    // Crack 1: top left to bottom
     { start: [centerX - 80, centerY - 60], mid: [centerX - 60, centerY], end: [centerX - 40, centerY + 50] },
-    // Crack 2: top right to bottom
     { start: [centerX + 70, centerY - 55], mid: [centerX + 50, centerY - 10], end: [centerX + 30, centerY + 45] },
-    // Crack 3: horizontal middle
     { start: [centerX - 100, centerY + 10], mid: [centerX - 20, centerY + 15], end: [centerX + 80, centerY + 5] }
   ];
   
-  // Draw dark cracks first
   ctx.strokeStyle = '#1a1410';
   ctx.lineWidth = 1.5;
   cracks.forEach(crack => {
@@ -2857,18 +2788,15 @@ function doKintsugi() {
     ctx.stroke();
   });
   
-  // Animate gold filling
   let prog = 0;
   function drawGold() {
     prog = Math.min(prog + 0.02, 1);
     
     cracks.forEach(crack => {
-      // Calculate current position along the curve
       const t = prog;
       const x = (1 - t) * (1 - t) * crack.start[0] + 2 * (1 - t) * t * crack.mid[0] + t * t * crack.end[0];
       const y = (1 - t) * (1 - t) * crack.start[1] + 2 * (1 - t) * t * crack.mid[1] + t * t * crack.end[1];
       
-      // Gold gradient
       const gradient = ctx.createLinearGradient(crack.start[0], crack.start[1], crack.end[0], crack.end[1]);
       gradient.addColorStop(0, '#b5703a');
       gradient.addColorStop(0.5, '#f0d080');
@@ -2889,7 +2817,6 @@ function doKintsugi() {
     
     if (prog < 1) requestAnimationFrame(drawGold);
     else {
-      // Add text after animation
       ctx.fillStyle = '#f0d080';
       ctx.font = '14px "Sarabun", sans-serif';
       ctx.textAlign = 'center';
@@ -2962,22 +2889,18 @@ function drawIkigaiDiagram() {
   const centerY = H / 2;
   const radius = 180;
   
-  // Clear canvas
   ctx.clearRect(0, 0, W, H);
   
-  // Background
   ctx.fillStyle = '#faf8f4';
   ctx.fillRect(0, 0, W, H);
   
-  // Draw 4 circles with colors matching the image
   const circles = [
-    { x: centerX, y: centerY - radius/2, color: 'rgba(255, 182, 193, 0.6)', label: 'สร้างสรรค์สิ่งที่\nทำค่างไว้' }, // Pink - top
-    { x: centerX + radius/2, y: centerY, color: 'rgba(255, 228, 196, 0.6)', label: 'จุดจ่อ แก้ไข' }, // Peach - right
-    { x: centerX, y: centerY + radius/2, color: 'rgba(152, 251, 152, 0.6)', label: 'พบคน' }, // Green - bottom
-    { x: centerX - radius/2, y: centerY, color: 'rgba(173, 216, 230, 0.6)', label: 'บรรเทาใจ' } // Blue - left
+    { x: centerX, y: centerY - radius/2, color: 'rgba(255, 182, 193, 0.6)', label: 'สร้างสรรค์สิ่งที่\nทำค่างไว้' },
+    { x: centerX + radius/2, y: centerY, color: 'rgba(255, 228, 196, 0.6)', label: 'จุดจ่อ แก้ไข' },
+    { x: centerX, y: centerY + radius/2, color: 'rgba(152, 251, 152, 0.6)', label: 'พบคน' },
+    { x: centerX - radius/2, y: centerY, color: 'rgba(173, 216, 230, 0.6)', label: 'บรรเทาใจ' }
   ];
   
-  // Draw circles
   circles.forEach(circle => {
     ctx.beginPath();
     ctx.arc(circle.x, circle.y, radius, 0, Math.PI * 2);
@@ -2985,7 +2908,6 @@ function drawIkigaiDiagram() {
     ctx.fill();
   });
   
-  // Draw center circle (white)
   ctx.beginPath();
   ctx.arc(centerX, centerY, 80, 0, Math.PI * 2);
   ctx.fillStyle = 'white';
@@ -2994,7 +2916,6 @@ function drawIkigaiDiagram() {
   ctx.lineWidth = 3;
   ctx.stroke();
   
-  // Center text "IKIGAI" with emoji
   ctx.fillStyle = '#b5703a';
   ctx.font = 'bold 28px Sarabun';
   ctx.textAlign = 'center';
@@ -3004,7 +2925,6 @@ function drawIkigaiDiagram() {
   ctx.fillStyle = '#5c4a9e';
   ctx.fillText('IKIGAI', centerX, centerY + 15);
   
-  // Labels for each circle
   const labels = [
     { text: 'สร้างสรรค์สิ่งที่\nทำค่างไว้', x: centerX, y: centerY - radius - 30, color: '#d63384' },
     { text: 'จุดจ่อ แก้ไข', x: centerX + radius + 40, y: centerY, color: '#fd7e14' },
@@ -3021,7 +2941,6 @@ function drawIkigaiDiagram() {
     });
   });
   
-  // Intersection labels (smaller text)
   ctx.font = '14px Sarabun';
   ctx.fillStyle = '#666';
   
@@ -3036,7 +2955,6 @@ function drawIkigaiDiagram() {
     ctx.fillText(int.text, int.x, int.y);
   });
   
-  // Title
   ctx.font = 'bold 24px Sarabun';
   ctx.fillStyle = '#5c4a9e';
   ctx.fillText('แผนภาพ Ikigai ของฉัน', centerX, 40);
@@ -3049,7 +2967,6 @@ function loadIkigai() {
   if(iki.world) document.getElementById('iki3').value=iki.world;
   if(iki.paid) document.getElementById('iki4').value=iki.paid;
   
-  // Check if all fields are filled and draw diagram
   const filled = Object.values(iki).filter(v=>v.trim()).length;
   if (filled >= 4) {
     drawIkigaiDiagram();
@@ -3327,7 +3244,6 @@ function exportSummary() {
 
 // ─── SOCIAL SHARING ────────────────────────────────────────
 
-// Share Card Drawing
 function drawShareCard(canvasId = 'shareCanvas') {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
@@ -3336,25 +3252,21 @@ function drawShareCard(canvasId = 'shareCanvas') {
   const W = canvas.width;
   const H = canvas.height;
   
-  // Background gradient
   const bg = ctx.createLinearGradient(0, 0, 0, H);
   bg.addColorStop(0, '#f2ede6');
   bg.addColorStop(1, '#e8c99a');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
   
-  // Border
   ctx.strokeStyle = '#b5703a';
   ctx.lineWidth = 8;
   ctx.strokeRect(20, 20, W-40, H-40);
   
-  // App logo
   ctx.font = 'bold 48px Sarabun';
   ctx.fillStyle = '#b5703a';
   ctx.textAlign = 'center';
   ctx.fillText('ใจดี...กับตัวเอง', W/2, 120);
   
-  // Theme-specific content
   switch(S.currentShareTheme) {
     case 'streak':
       drawStreakCard(ctx, W, H);
@@ -3369,7 +3281,6 @@ function drawShareCard(canvasId = 'shareCanvas') {
       drawAchievementCard(ctx, W, H);
   }
   
-  // Footer
   ctx.font = '24px Sarabun';
   ctx.fillStyle = '#7a6e60';
   ctx.textAlign = 'center';
@@ -3452,21 +3363,18 @@ function drawWeeklyCard(ctx, W, H) {
   ctx.fillStyle = '#2a2118';
   ctx.fillText('สรุปสัปดาห์นี้', W/2, 240);
   
-  // Mood tracking
   ctx.font = '48px Arial';
   ctx.fillText('📝', W/2, 360);
   ctx.font = 'bold 42px Sarabun';
   ctx.fillStyle = '#b5703a';
   ctx.fillText(`บันทึกอารมณ์ ${weekMoods}/7 วัน`, W/2, 420);
   
-  // Meditation
   ctx.font = '48px Arial';
   ctx.fillText('🧘', W/2, 540);
   ctx.font = 'bold 42px Sarabun';
   ctx.fillStyle = '#4a7a5e';
   ctx.fillText(`ฝึกสมาธิ ${weekMeditations} ครั้ง`, W/2, 600);
   
-  // Gratitude
   const weekGratitude = S.memories.filter(m => {
     const date = new Date(m.time);
     const weekStart = new Date();
@@ -3486,7 +3394,6 @@ function setShareTheme(theme) {
   drawShareCard();
 }
 
-// Quick Share Functions
 function shareStreak() {
   S.currentShareTheme = 'streak';
   drawShareCard('modalShareCanvas');
@@ -3509,7 +3416,6 @@ function closeShareModal() {
   document.getElementById('shareModal').classList.remove('show');
 }
 
-// Download Functions
 function downloadShareCard() {
   const canvas = document.getElementById('shareCanvas');
   const url = canvas.toDataURL('image/png');
@@ -3530,7 +3436,6 @@ function downloadModalCard() {
   showNotification('📥 ดาวน์โหลดสำเร็จ', 'บันทึกรูปภาพแล้ว');
 }
 
-// Social Share Functions
 function getShareText() {
   switch(S.currentShareTheme) {
     case 'streak':
@@ -3577,7 +3482,6 @@ function copyShareText() {
   });
 }
 
-// Modal Share Functions
 function shareModalToFacebook() {
   shareToFacebook();
   closeShareModal();
@@ -3647,36 +3551,25 @@ const totalSlides = 6;
 
 function checkOnboarding() {
   const hasSeenOnboarding = localStorage.getItem('wl_onboarding_complete');
-  console.log('🔍 Checking onboarding...', { hasSeenOnboarding });
   
-  // Hide splash screen after 2.5 seconds
   setTimeout(() => {
-    console.log('⏰ Hiding splash screen...');
     const splash = document.getElementById('splashScreen');
     if (splash) {
       splash.classList.add('hidden');
     }
     
-    // Show onboarding if first time (with extra delay for iOS)
     if (!hasSeenOnboarding) {
-      console.log('✨ First time! Showing onboarding...');
       setTimeout(() => {
         showOnboarding();
-      }, 300); // Longer delay for iOS
-    } else {
-      console.log('✅ Already seen onboarding, skipping...');
+      }, 300);
     }
   }, 2500);
 }
 
 function showOnboarding() {
-  console.log('🎉 Showing onboarding overlay...');
   const overlay = document.getElementById('onboardingOverlay');
   if (overlay) {
     overlay.classList.add('show');
-    console.log('✅ Onboarding overlay shown');
-  } else {
-    console.error('❌ onboardingOverlay element not found!');
   }
 }
 
@@ -3697,19 +3590,16 @@ function goToSlide(index) {
 }
 
 function updateSlides() {
-  // Update slides
   const slides = document.querySelectorAll('.onboarding-slide');
   slides.forEach((slide, index) => {
     slide.classList.toggle('active', index === currentSlide);
   });
   
-  // Update dots
   const dots = document.querySelectorAll('.onboarding-dot');
   dots.forEach((dot, index) => {
     dot.classList.toggle('active', index === currentSlide);
   });
   
-  // Update buttons
   const skipBtn = document.getElementById('skipBtn');
   const nextBtn = document.getElementById('nextBtn');
   const startBtn = document.getElementById('startBtn');
@@ -3735,7 +3625,6 @@ function finishOnboarding() {
   showNotification('🌸 ยินดีต้อนรับ!', 'เริ่มต้นเส้นทางดูแลจิตใจของคุณได้เลย');
 }
 
-// Reset onboarding (for testing or if user wants to see it again)
 window.resetOnboarding = function() {
   localStorage.removeItem('wl_onboarding_complete');
   currentSlide = 0;
@@ -3762,14 +3651,10 @@ function init() {
   drawShareCard();
   initSounds();
   
-  // Update premium status
   updatePremiumStatus();
-  
-  // Check if user has seen onboarding
   checkOnboarding();
 }
 
-// Wait for DOM to be ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
@@ -3780,22 +3665,15 @@ if (document.readyState === 'loading') {
 let deferredPrompt;
 let isIOSDevice = false;
 
-// Check if iOS
 if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
   isIOSDevice = true;
 }
 
-// Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./service-worker.js')
       .then((registration) => {
-        console.log('✅ Service Worker registered:', registration.scope);
-        
-        // Request notification permission after registration
         requestNotificationPermission(registration);
-        
-        // Setup daily reminder
         setupDailyReminder(registration);
       })
       .catch((error) => {
@@ -3804,70 +3682,42 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Install prompt (Add to Home Screen)
 window.addEventListener('beforeinstallprompt', (e) => {
-  console.log('💾 beforeinstallprompt event fired');
   e.preventDefault();
   deferredPrompt = e;
   
-  console.log('✅ Install prompt saved, deferredPrompt:', !!deferredPrompt);
-  
-  // Show install prompt after onboarding
   setTimeout(() => {
     if (!localStorage.getItem('wl_install_prompted')) {
-      console.log('🎯 Auto-showing install prompt...');
       showInstallPrompt();
     }
-  }, 5000); // Show 5 seconds after page load
+  }, 5000);
 });
 
 window.addEventListener('appinstalled', () => {
-  console.log('✅ PWA installed successfully');
   localStorage.setItem('wl_pwa_installed', 'true');
   deferredPrompt = null;
-  
   showNotification('🎉 ติดตั้งสำเร็จ!', 'ตอนนี้คุณสามารถเปิดแอปได้จากหน้าจอหลักแล้ว');
 });
 
-// Request Notification Permission
 async function requestNotificationPermission(registration) {
-  if (!('Notification' in window)) {
-    console.log('❌ Browser does not support notifications');
-    return;
-  }
-  
-  // Don't ask on first visit - wait for user engagement
+  if (!('Notification' in window)) return;
   const hasAsked = localStorage.getItem('wl_notification_asked');
-  if (!hasAsked) {
-    // Ask after user completes first action
-    return;
-  }
+  if (!hasAsked) return;
   
   if (Notification.permission === 'default') {
     const permission = await Notification.permission;
-    
     if (permission === 'granted') {
-      console.log('✅ Notification permission granted');
       subscribeUserToPush(registration);
-    } else if (permission === 'denied') {
-      console.log('❌ Notification permission denied');
     }
   } else if (Notification.permission === 'granted') {
     subscribeUserToPush(registration);
   }
 }
 
-// Ask for notification permission (called after user action)
 function askNotificationPermission() {
-  if (!('Notification' in window)) {
-    return;
-  }
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'granted') return;
   
-  if (Notification.permission === 'granted') {
-    return;
-  }
-  
-  // Show custom UI first
   const modal = `
     <div class="modal-overlay show" id="notificationModal">
       <div class="modal-content">
@@ -3895,7 +3745,6 @@ function askNotificationPermission() {
       </div>
     </div>
   `;
-  
   document.body.insertAdjacentHTML('beforeend', modal);
 }
 
@@ -3917,8 +3766,6 @@ async function enableNotifications() {
   
   if (permission === 'granted') {
     showNotification('✅ เปิดการแจ้งเตือนแล้ว', 'คุณจะได้รับการแจ้งเตือนทุกวัน');
-    
-    // Register for push
     if ('serviceWorker' in navigator) {
       const registration = await navigator.serviceWorker.ready;
       subscribeUserToPush(registration);
@@ -3926,49 +3773,15 @@ async function enableNotifications() {
   }
 }
 
-// Subscribe to push notifications
 async function subscribeUserToPush(registration) {
-  try {
-    // This would require a VAPID key from your server
-    // For client-side only, we'll use local notifications
-    console.log('✅ Ready for push notifications');
-  } catch (error) {
-    console.error('❌ Failed to subscribe to push:', error);
-  }
+  console.log('✅ Ready for push notifications');
 }
 
-// Setup Daily Reminder (using setTimeout/setInterval)
 function setupDailyReminder(registration) {
-  // Check every hour if it's time to remind
   setInterval(() => {
     checkDailyReminder();
-  }, 60 * 60 * 1000); // Check every hour
-  
-  // Also check on page load
+  }, 60 * 60 * 1000);
   checkDailyReminder();
-}
-
-function checkDailyReminder() {
-  if (Notification.permission !== 'granted') return;
-  
-  const reminderTime = localStorage.getItem('wl_goals') 
-    ? JSON.parse(localStorage.getItem('wl_goals')).reminderTime 
-    : '20:00';
-  
-  const [hour, minute] = reminderTime.split(':').map(Number);
-  const now = new Date();
-  
-  // Check if it's the right time (within 5 minutes)
-  if (now.getHours() === hour && now.getMinutes() >= minute && now.getMinutes() < minute + 5) {
-    // Check if already notified today
-    const lastNotified = localStorage.getItem('wl_last_notified');
-    const today = new Date().toDateString();
-    
-    if (lastNotified !== today) {
-      sendDailyReminder();
-      localStorage.setItem('wl_last_notified', today);
-    }
-  }
 }
 
 function sendDailyReminder() {
@@ -3986,7 +3799,6 @@ function sendDailyReminder() {
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
     
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-      // Send through service worker
       navigator.serviceWorker.ready.then((registration) => {
         registration.showNotification('🌸 ใจดี...กับตัวเอง', {
           body: randomMessage,
@@ -3995,13 +3807,10 @@ function sendDailyReminder() {
           tag: 'daily-reminder',
           vibrate: [200, 100, 200],
           requireInteraction: false,
-          data: {
-            url: '/?mode=mood'
-          }
+          data: { url: '/?mode=mood' }
         });
       });
     } else {
-      // Fallback to basic notification
       new Notification('🌸 ใจดี...กับตัวเอง', {
         body: randomMessage,
         icon: '/icons/icon-192x192.png',
@@ -4011,12 +3820,9 @@ function sendDailyReminder() {
   }
 }
 
-// Install Prompt for Android/Desktop
 function showInstallPrompt() {
   if (!deferredPrompt) {
-    if (isIOSDevice) {
-      showInstallPromptIOS();
-    }
+    if (isIOSDevice) showInstallPromptIOS();
     return;
   }
   
@@ -4055,23 +3861,12 @@ function closeInstallModal() {
 
 async function installApp() {
   if (!deferredPrompt) return;
-  
   deferredPrompt.prompt();
   const { outcome } = await deferredPrompt.userChoice;
-  
-  console.log(`User response to install prompt: ${outcome}`);
-  
-  if (outcome === 'accepted') {
-    console.log('✅ User accepted install prompt');
-  } else {
-    console.log('❌ User dismissed install prompt');
-  }
-  
   closeInstallModal();
   deferredPrompt = null;
 }
 
-// Install Prompt for iOS
 function showInstallPromptIOS() {
   const modal = `
     <div class="modal-overlay show" id="installModalIOS">
@@ -4089,11 +3884,6 @@ function showInstallPromptIOS() {
             <p style="margin-left: 20px; color: var(--muted); font-size: 13px;">(Add to Home Screen)</p>
             <p>3️⃣ กด <strong>"เพิ่ม"</strong> (Add)</p>
           </div>
-          <div style="background: var(--accent-pale); padding: 15px; border-radius: 10px; margin-top: 20px;">
-            <p style="font-size: 13px; color: var(--accent);">
-              💡 หลังจากติดตั้ง คุณจะเปิดแอปได้จากหน้าจอหลักเหมือนแอปทั่วไป!
-            </p>
-          </div>
           <button class="btn btn-primary" onclick="closeInstallModalIOS()" style="margin-top: 20px; width: 100%;">
             เข้าใจแล้ว
           </button>
@@ -4101,7 +3891,6 @@ function showInstallPromptIOS() {
       </div>
     </div>
   `;
-  
   document.body.insertAdjacentHTML('beforeend', modal);
 }
 
@@ -4110,27 +3899,16 @@ function closeInstallModalIOS() {
   if (modal) modal.remove();
 }
 
-// Add global function to manually trigger install prompt
 window.showInstallInstructions = function() {
-  console.log('📱 showInstallInstructions called', { 
-    isIOSDevice, 
-    hasDeferredPrompt: !!deferredPrompt,
-    userAgent: navigator.userAgent 
-  });
-  
-  // Always show iOS instructions on iOS devices
   if (isIOSDevice || /iPad|iPhone|iPod/.test(navigator.userAgent)) {
     showInstallPromptIOS();
   } else if (deferredPrompt) {
-    // Android/Desktop with install prompt available
     showInstallPrompt();
   } else {
-    // Android/Desktop but no prompt yet - show manual instructions
     showAndroidInstallInstructions();
   }
 };
 
-// Android manual install instructions
 function showAndroidInstallInstructions() {
   const modal = `
     <div class="modal-overlay show" id="androidInstallModal">
@@ -4148,11 +3926,6 @@ function showAndroidInstallInstructions() {
             <p style="margin-left: 20px; color: var(--muted); font-size: 13px;">หรือ "Install app"</p>
             <p>3️⃣ กด <strong>"Install"</strong> หรือ <strong>"Add"</strong></p>
           </div>
-          <div style="background: var(--accent-pale); padding: 15px; border-radius: 10px; margin-top: 20px;">
-            <p style="font-size: 13px; color: var(--accent);">
-              💡 หลังจากติดตั้ง คุณจะเปิดแอปได้จากหน้าจอหลักเหมือนแอปทั่วไป!
-            </p>
-          </div>
           <button class="btn btn-primary" onclick="closeAndroidInstallModal()" style="margin-top: 20px; width: 100%;">
             เข้าใจแล้ว
           </button>
@@ -4160,7 +3933,6 @@ function showAndroidInstallInstructions() {
       </div>
     </div>
   `;
-  
   document.body.insertAdjacentHTML('beforeend', modal);
 }
 
@@ -4169,27 +3941,7 @@ function closeAndroidInstallModal() {
   if (modal) modal.remove();
 }
 
-// Debug function - check PWA installation status
 window.checkPWAStatus = function() {
-  console.log('=== PWA Status ===');
-  console.log('User Agent:', navigator.userAgent);
-  console.log('Is iOS:', isIOSDevice);
-  console.log('Has deferredPrompt:', !!deferredPrompt);
-  console.log('Service Worker supported:', 'serviceWorker' in navigator);
-  console.log('Manifest:', document.querySelector('link[rel="manifest"]')?.href);
-  console.log('Standalone mode:', window.matchMedia('(display-mode: standalone)').matches);
-  console.log('Install prompted before:', localStorage.getItem('wl_install_prompted'));
-  console.log('PWA installed before:', localStorage.getItem('wl_pwa_installed'));
-  
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-      console.log('Service Worker registrations:', registrations.length);
-      registrations.forEach((reg, i) => {
-        console.log(`  [${i}]`, reg.scope);
-      });
-    });
-  }
-  
   return {
     isIOSDevice,
     hasDeferredPrompt: !!deferredPrompt,
@@ -4198,13 +3950,9 @@ window.checkPWAStatus = function() {
   };
 };
 
-// Add global function to manually ask for notifications
 window.enableAppNotifications = function() {
-  // Check if iOS
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  
   if (isIOS) {
-    // Show message that iOS doesn't support web notifications
     const modal = `
       <div class="modal-overlay show" id="iosNotificationInfo">
         <div class="modal-content">
@@ -4217,15 +3965,6 @@ window.enableAppNotifications = function() {
             <p style="color: var(--ink); line-height: 1.7; margin-bottom: 25px;">
               <strong>Safari บน iOS/iPadOS ยังไม่รองรับ Web Push Notifications</strong>
             </p>
-            <div style="text-align: left; line-height: 2; margin: 25px 0;">
-              <p style="margin-bottom: 15px; font-weight: 600;">แต่คุณยังสามารถ:</p>
-              <p>1️⃣ <strong>ติดตั้งแอปไปยังหน้าจอหลัก</strong></p>
-              <p style="margin-left: 20px; color: var(--muted); font-size: 13px;">เพื่อเข้าถึงได้ง่ายขึ้น</p>
-              <p>2️⃣ <strong>ตั้งเวลาเตือนในปฏิทิน</strong></p>
-              <p style="margin-left: 20px; color: var(--muted); font-size: 13px;">สร้าง reminder ใน iOS Calendar</p>
-              <p>3️⃣ <strong>ตั้ง Alarm เตือนตัวเอง</strong></p>
-              <p style="margin-left: 20px; color: var(--muted); font-size: 13px;">เช่น ทุกวัน 20:00 น.</p>
-            </div>
             <button class="btn btn-primary" onclick="closeIOSNotificationInfo()" style="width: 100%; margin-top: 20px;">
               เข้าใจแล้ว
             </button>
@@ -4233,12 +3972,9 @@ window.enableAppNotifications = function() {
         </div>
       </div>
     `;
-    
     document.body.insertAdjacentHTML('beforeend', modal);
     return;
   }
-  
-  // For non-iOS devices
   askNotificationPermission();
 };
 
@@ -4247,12 +3983,9 @@ function closeIOSNotificationInfo() {
   if (modal) modal.remove();
 }
 
-// Ask for notification permission after first mood log
 const originalSelectMood = selectMood;
 window.selectMood = function(val, btn) {
   originalSelectMood(val, btn);
-  
-  // Ask for notification permission after first mood
   const hasAsked = localStorage.getItem('wl_notification_asked');
   if (!hasAsked && Notification.permission === 'default') {
     setTimeout(() => {
@@ -4265,32 +3998,23 @@ window.selectMood = function(val, btn) {
 // PREMIUM FEATURES & MONETIZATION SYSTEM
 // ═══════════════════════════════════════════════════════════
 
-// ─── PREMIUM CHECK ─────────────────────────────────────────
 function isPremium() {
   return localStorage.getItem('wl_premium') === 'true';
 }
 
 function checkPremiumFeature(featureName) {
-  if (isPremium()) {
-    return true;
-  }
+  if (isPremium()) return true;
   showPaywall(featureName);
   return false;
 }
 
-// ─── UNLOCK PREMIUM ────────────────────────────────────────
 function unlockPremium() {
   localStorage.setItem('wl_premium', 'true');
   S.isPremium = true;
   updatePremiumStatus();
   closeDonateModal();
-  
   showNotification('🎉 ปลดล็อกสำเร็จ!', 'ขอบคุณที่ช่วยเหลือผู้พัฒนา ฟีเจอร์ทั้งหมดพร้อมใช้งานแล้ว!');
-  
-  // Refresh UI
-  setTimeout(() => {
-    location.reload();
-  }, 2000);
+  setTimeout(() => { location.reload(); }, 2000);
 }
 
 function updatePremiumStatus() {
@@ -4311,7 +4035,6 @@ function updatePremiumStatus() {
   }
 }
 
-// ─── MODALS ────────────────────────────────────────────────
 function showDonateModal() {
   document.getElementById('donateModal').classList.add('show');
 }
@@ -4326,36 +4049,17 @@ function showPaywall(featureName) {
   const descEl = document.getElementById('paywallDesc');
   
   const features = {
-    'share': {
-      title: '🎨 แชร์การ์ดสวยๆ',
-      desc: 'สร้างและแชร์การ์ดสวยๆ ไปยัง Facebook, Instagram, LINE และโซเชียลอื่นๆ'
-    },
-    'export': {
-      title: '📊 Export ข้อมูล',
-      desc: 'ดาวน์โหลดข้อมูลทั้งหมดเป็นไฟล์ CSV หรือ PDF เพื่อเก็บไว้หรือวิเคราะห์'
-    },
-    'stats_full': {
-      title: '📈 สถิติย้อนหลังทั้งหมด',
-      desc: 'ดูสถิติและกราฟย้อนหลังทั้งหมด ไม่จำกัดเฉพาะ 7 วัน'
-    },
-    'sounds': {
-      title: '🎵 Soundscape ครบทุกเสียง',
-      desc: 'ใช้เสียงธรรมชาติครบทั้ง 6 แบบ: ฝน, ลำธาร, คลื่น, ป่า, ลม, ไฟ'
-    },
-    'themes': {
-      title: '🎨 ธีมสีพิเศษ',
-      desc: 'เลือกใช้ธีมสีพิเศษมากกว่า 5 แบบ ตกแต่งแอปตามใจคุณ'
-    }
+    'share': { title: '🎨 แชร์การ์ดสวยๆ', desc: 'สร้างและแชร์การ์ดสวยๆ ไปยัง Facebook, Instagram, LINE และโซเชียลอื่นๆ' },
+    'export': { title: '📊 Export ข้อมูล', desc: 'ดาวน์โหลดข้อมูลทั้งหมดเป็นไฟล์ CSV หรือ PDF เพื่อเก็บไว้หรือวิเคราะห์' },
+    'stats_full': { title: '📈 สถิติย้อนหลังทั้งหมด', desc: 'ดูสถิติและกราฟย้อนหลังทั้งหมด ไม่จำกัดเฉพาะ 7 วัน' },
+    'sounds': { title: '🎵 Soundscape ครบทุกเสียง', desc: 'ใช้เสียงธรรมชาติครบทั้ง 6 แบบ: ฝน, ลำธาร, คลื่น, ป่า, ลม, ไฟ' },
+    'themes': { title: '🎨 ธีมสีพิเศษ', desc: 'เลือกใช้ธีมสีพิเศษมากกว่า 5 แบบ ตกแต่งแอปตามใจคุณ' }
   };
   
-  const feature = features[featureName] || {
-    title: 'ฟีเจอร์พรีเมียม',
-    desc: 'ฟีเจอร์นี้เป็นส่วนหนึ่งของ Premium Features'
-  };
+  const feature = features[featureName] || { title: 'ฟีเจอร์พรีเมียม', desc: 'ฟีเจอร์นี้เป็นส่วนหนึ่งของ Premium Features' };
   
   titleEl.textContent = feature.title;
   descEl.textContent = feature.desc;
-  
   modal.classList.add('show');
 }
 
@@ -4363,7 +4067,6 @@ function closePaywall() {
   document.getElementById('paywallModal').classList.remove('show');
 }
 
-// ─── CONTACT & FEEDBACK ────────────────────────────────────
 function openEmail() {
   const subject = encodeURIComponent('ติดต่อผู้พัฒนา "ใจดี...กับตัวเอง"');
   const body = encodeURIComponent('สวัสดีครับ,\n\n');
@@ -4371,17 +4074,13 @@ function openEmail() {
 }
 
 function openFeedbackForm() {
-  // TODO: แทนที่ด้วย Google Form URL ที่สร้างจริง
   const formURL = 'https://forms.gle/YOUR_FORM_ID';
   window.open(formURL, '_blank');
 }
 
-// ─── OVERRIDE SHARE MODAL ──────────────────────────────────
 const originalShowShareModal = showShareModal;
 window.showShareModal = function() {
-  if (!checkPremiumFeature('share')) {
-    return;
-  }
+  if (!checkPremiumFeature('share')) return;
   originalShowShareModal();
 };
 </script>
